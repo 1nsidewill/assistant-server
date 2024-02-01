@@ -1,0 +1,52 @@
+[tool.poetry]
+name = "chat_server"
+version = "0.0.1"
+description = ""
+authors = ["Eric Yoo <suyoo@didim365.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+fastapi = ">=0.96.0"
+uvicorn = {extras = ["standard"], version = "^0.22.0"}
+hcxai = { path = "packages/hcxai-1.0.0-py3-none-any.whl" }
+langchain_core = { path = "packages/langchain_core-0.1.4-py3-none-any.whl" }
+langchain_community = { path = "packages/langchain_community-0.0.7-py3-none-any.whl" }
+langchain = { path = "packages/langchain-0.0.353-py3-none-any.whl" }
+pydantic = ">=2"
+pydantic-settings = ">=2"
+pymilvus = ">=2"
+redis = ">=4"
+psycopg2-binary = ">=2"
+langserve = ">=0.0.38"
+opentelemetry-api = ">=1"
+opentelemetry-sdk = ">=1"
+opentelemetry-exporter-otlp = ">=1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.1"
+mypy = "^1.4.1"
+ruff = "^0.0.278"
+black = "^23.7.0"
+syrupy = "^4.0.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+select = [
+  "E",  # pycodestyle
+  "F",  # pyflakes
+  "I",  # isort
+]
+
+[tool.mypy]
+ignore_missing_imports = "True"
+disallow_untyped_defs = "True"
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers --strict-config --durations=5 --snapshot-warn-unused"
