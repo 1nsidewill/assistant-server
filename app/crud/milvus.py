@@ -1,19 +1,13 @@
 #config import
 from config import Settings
-
 #text loader
 from langchain.docstore.document import Document
-
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-
 #embedding(HCX) import
 from langchain_community.embeddings import HCXEmbeddings
-
 #Milvus import 
 from langchain_community.vectorstores import Milvus
-
 from pymilvus import connections, CollectionSchema, FieldSchema, DataType, Collection, utility, db
-
 #postgresql connect import
 import psycopg2
 
@@ -22,11 +16,11 @@ import psycopg2
 conf = Settings()
 
 #Milvus connect info
-HOST = conf.milvus_HOST
-PORT = conf.milvus_PORT
-USER = conf.milvus_USER
-PW = conf.milvus_PW
-database = conf.milvus_Database
+HOST = conf.milvus_host
+PORT = conf.milvus_port
+USER = conf.milvus_user
+PW = conf.milvus_password
+database = conf.milvus_db_name
 
 #postgresql connect info
 postgre_HOST = conf.postgre_HOST
@@ -44,12 +38,11 @@ hcx_clovastudio_api_key = conf.hcx_clovastudio_api_key
 hcx_apigw_api_key = conf.hcx_apigw_api_key
 
 #Milvus connect info
-milvus_HOST = conf.milvus_HOST
-milvus_PORT = conf.milvus_PORT
-milvus_Database = conf.milvus_Database
-milvus_USER = conf.milvus_USER
-milvus_PW = conf.milvus_PW
-
+milvus_HOST = conf.milvus_host
+milvus_PORT = conf.milvus_port
+milvus_Database = conf.milvus_db_name
+milvus_USER = conf.milvus_user
+milvus_PW = conf.milvus_password
 
 #Milvus collection info
 milvus_collection_name = "domain_desc"
@@ -128,7 +121,6 @@ def split_documents(gdocuments):
     '''
     print("Result Split Finish!!")
     return split_doc
-
 
 # ==================================================================
 # Connect Milvus
@@ -226,15 +218,10 @@ def recreate_milvus_collection():
     collection.create_index("vector", index)
     print("File Input Collection Create Finish!!")
 
-
-
-
 #connect milvus
 vector_db = connect_milvus()
-
 #recreate milvus collection(domain_desc)
 #recreate_milvus_collection()
-
 #get domain list in postgresql
 domain_list = check_domain_in_pg()
 
