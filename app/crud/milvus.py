@@ -12,24 +12,18 @@ from pymilvus import connections, CollectionSchema, FieldSchema, DataType, Colle
 import psycopg2
 
 from app.crud import schema
+from app.crud.metadb import QueryMetaDB
 
 
 
 conf = get_settings()
 
-#Milvus connect info
-HOST = conf.milvus_host
-PORT = conf.milvus_port
-USER = conf.milvus_user
-PW = conf.milvus_password
-database = conf.milvus_db_name
-
-#postgresql connect info
-postgre_HOST = conf.postgre_HOST
-postgre_PORT = conf.postgre_PORT
-postgre_DB = conf.postgre_DB
-postgre_USER = conf.postgre_USER
-postgre_PW = conf.postgre_PW
+# #Milvus connect info
+# HOST = conf.milvus_host
+# PORT = conf.milvus_port
+# USER = conf.milvus_user
+# PW = conf.milvus_password
+# database = conf.milvus_db_name
 
 #Hyper Clover X connect info
 hcx_mode = conf.hcx_mode
@@ -54,42 +48,44 @@ milvus_collection_name = "domain_desc"
 # ==================================================================
 def check_domain_in_pg():
     print("Check Domain in PG Start!!")
+    metadb = QueryMetaDB()
+    return metadb.get_domain_list()
     #db connect
-    pg_connection = psycopg2.connect(
-        host = postgre_HOST,
-        port = postgre_PORT,
-        database = postgre_DB,
-        user = postgre_USER,
-        password = postgre_PW
-    )
+    # pg_connection = psycopg2.connect(
+    #     host = postgre_HOST,
+    #     port = postgre_PORT,
+    #     database = postgre_DB,
+    #     user = postgre_USER,
+    #     password = postgre_PW
+    # )
 
-    cursor = pg_connection.cursor()
-    try:
-        #PGData Select
-        select_sql =  " SELECT DOMAIN_ID, DOMAIN_NAME, DOMAIN_DESC "        
-        select_sql += "   FROM DOMAIN "        
-        cursor.execute(select_sql)        
-        rows = cursor.fetchall()
-        #print(rows)
+    # cursor = pg_connection.cursor()
+    # try:
+    #     #PGData Select
+    #     select_sql =  " SELECT DOMAIN_ID, DOMAIN_NAME, DOMAIN_DESC "        
+    #     select_sql += "   FROM DOMAIN "        
+    #     cursor.execute(select_sql)        
+    #     rows = cursor.fetchall()
+    #     #print(rows)
 
-        #get file info list
-        insert_domain_list = [] 
-        #print(rows)       
-        for row in rows:
-            domain_list = {}
-            domain_list['domain_id'] = row[0]
-            domain_list['domain_name'] = row[1]
-            domain_list['domain_desc'] = row[2]
-            insert_domain_list.append(domain_list)            
+    #     #get file info list
+    #     insert_domain_list = [] 
+    #     #print(rows)       
+    #     for row in rows:
+    #         domain_list = {}
+    #         domain_list['domain_id'] = row[0]
+    #         domain_list['domain_name'] = row[1]
+    #         domain_list['domain_desc'] = row[2]
+    #         insert_domain_list.append(domain_list)            
         
-        #print(insert_file_list)
-    except Exception as e:
-        print("Error : " + str(e))
+    #     #print(insert_file_list)
+    # except Exception as e:
+    #     print("Error : " + str(e))
 
-    cursor.close()
-    pg_connection.close()
-    print("Check Domain in PG Finish!!")
-    return insert_domain_list
+    # cursor.close()
+    # pg_connection.close()
+    # print("Check Domain in PG Finish!!")
+    # return insert_domain_list
 
 
 # ==================================================================
@@ -181,11 +177,11 @@ def insert_milvus(gvector_db, ginsert_docs, gids):
 def recreate_milvus_collection(collection_name):
     print("Milvus Connect Start!!")
     connections.connect(    
-        user=USER,
-        password=PW,
-        host=HOST,
-        port=PORT,
-        db_name=database,
+        user=milvus_USER,
+        password=milvus_PW,
+        host=milvus_HOST,
+        port=milvus_PORT,
+        db_name=milvus_Database,
     )
 
     utility.drop_collection(collection_name)

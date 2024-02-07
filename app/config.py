@@ -34,12 +34,13 @@ class Settings(BaseSettings):
     callback_url: str
     callback_name: str
 
-    #postgresql connect info
-    postgre_HOST: str
-    postgre_PORT: int
-    postgre_DB: str
-    postgre_USER: str
-    postgre_PW: str
+    #metadb connect info
+    metadb_DRIVER: str
+    metadb_HOST: str
+    metadb_PORT: int
+    metadb_DB: str
+    metadb_USER: str
+    metadb_PW: str
     
     #NCloud Object Storage connect info
     service_name: str
