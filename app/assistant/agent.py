@@ -55,7 +55,7 @@ class AssistantAgent(BaseSingleActionAgent):
     _outputs: List[Dict[str, Any]] = []
     """outputs"""
     _metadb: Optional[QueryMetaDB] = None
-    _metadb_uri: Optional[str] = None
+    # _metadb_uri: Optional[str] = None
     """query Database"""
 
     def dict(self, **kwargs: Any) -> Dict:
@@ -158,12 +158,9 @@ class AssistantAgent(BaseSingleActionAgent):
 
     @property
     def metadb(self) -> QueryMetaDB:
-        if self._metadb == None:
-            if self._metadb_uri:
-                self._metadb = QueryMetaDB.from_uri(self._metadb_uri)
-            else:
-                raise ValueError("Cant find metadb uri")
-        return self._metadb
+        if self.__class__._metadb == None:
+            self.__class__._metadb = QueryMetaDB()
+        return self.__class__._metadb
 
     @classmethod
     def from_llm_and_tools(

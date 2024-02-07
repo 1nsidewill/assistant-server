@@ -12,7 +12,7 @@ class QueryMetaDB:
             from app.config import get_settings
             conf = get_settings()
             url_object = URL.create(
-                driver=conf.metadb_DRIVER,
+                drivername=conf.metadb_DRIVER,
                 username=conf.metadb_USER,
                 password=conf.metadb_PW,  # plain (unescaped) text
                 host=conf.metadb_HOST,
