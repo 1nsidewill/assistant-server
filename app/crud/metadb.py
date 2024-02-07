@@ -1,7 +1,7 @@
 from typing import (Any, Dict, Iterator, List, Optional, Literal, Sequence, Tuple, Union,)
 from sqlalchemy import URL
 
-from langchain.sql_database import (SQLDatabase, truncate_word)
+from langchain.sql_database import (SQLDatabase)
 
 def truncate_word(content: Any, *, length: int, suffix: str = "...") -> str:
     if not isinstance(content, str) or length <= 0:
