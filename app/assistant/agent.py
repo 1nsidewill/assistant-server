@@ -1,4 +1,5 @@
 from typing import (Any, Dict, Iterator, List, Optional, Sequence, Tuple, Union,)
+import json
 
 from langchain_core.agents import (AgentAction, AgentFinish, AgentStep)
 from langchain_core.callbacks import (BaseCallbackHandler)
@@ -14,6 +15,7 @@ from langchain.chains import (LLMChain)
 from langchain.agents.utils import (validate_tools_single_input)
 from langchain.callbacks.manager import (Callbacks)
 from app.crud.metadb import QueryMetaDB
+from app.assistant.tools.openapitool import (OpenAPITool, OpenAPISpec)
 
 class AssistantAgent(BaseSingleActionAgent):
     """Agent powered by didm365."""
@@ -71,16 +73,24 @@ class AssistantAgent(BaseSingleActionAgent):
                     if len(docs) > 0:
                         api_id = docs[0].metadata['api_id']
                         (system_id, api_spec)= self.metadb.get_api(api_id)
-                        (connect_type, connect_spac)= self.metadb.get_system(system_id)
+                        (connect_type, connect_spec)= self.metadb.get_system(system_id)
+                        
+                        app_api_spec: dict = json.loads(connect_spec)
+                        app_api_spec.update(dict(json.loads(api_spec)))
+                        path = list(app_api_spec['paths'].keys())[0]
+                        method = list(app_api_spec['paths'][path].keys())[0]
                         
                         if connect_type == "REST":
-                            prompt_str = self.metadb.get_prompt(self.metadb.prompt['FILL_API_CALL'])
-                            prompt = ChatPromptTemplate.from_template(prompt_str)
+                            api_tool = OpenAPITool.from_llm_and_method(
+                                llm=self.llm,
+                                path=path,
+                                method=method,
+                                spec=OpenAPISpec.from_spec_dict(app_api_spec),
+                            )
                             
-                            api_call = LLMChain(llm=self.llm, prompt=prompt).invoke(observation) # api spec -> Call 준비
-
-                            api_call.upadte({"header": {"api_key": "a1234"}})
-                            return AgentAction(tool="request_get", tool_input=api_call, log="find data with call api", kwargs=config)
+                            result = api_tool.run('')
+                            
+                            return AgentFinish(return_values=result, log="agent end with api")
                         elif connect_type == "SQL":
                             prompt_str = self.metadb.get_prompt(self.metadb.prompt['FILL_SQL_QUERTY'])
                             prompt = ChatPromptTemplate.from_template(prompt_str)

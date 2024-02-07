@@ -2,13 +2,22 @@ import json
 
 from langchain_community.chat_models import ChatHCX
 # from langchain.globals import (set_debug)
+import sys
+import os
+
+# Add the parent directory (project/) to sys.path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
+sys.path.append('/app')
 
 from app.assistant.tools.openapitool import (OpenAPITool, OpenAPISpec)
 
 # set_debug(True)
 
 system_spec: str = '''{
-    "openapi":"3.0.0",
+    "openapi":"3.1.0",
     "info":{
         "title":"HyperClovaX-BOT",
         "description":"네임서버에 등록 가능한 도메인인지 확인해 볼 수 있는 API입니다.",

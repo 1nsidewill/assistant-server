@@ -1,4 +1,5 @@
 from typing import (Any, Dict, Iterator, List, Optional, Literal, Sequence, Tuple, Union,)
+import ast
 from sqlalchemy import URL
  
 from langchain.sql_database import (SQLDatabase)
@@ -45,7 +46,8 @@ class QueryMetaDB:
  
         res = [
             {
-                column: truncate_word(value, length=self.__class__.db._max_string_length)
+                # column: truncate_word(value, length=self.__class__.db._max_string_length)
+                column: truncate_word(value, length=3000)
                 for column, value in r.items()
             }
             for r in result
@@ -61,6 +63,19 @@ class QueryMetaDB:
         result = self.run(query, "one")
         if result:
             connect_type, connect_spec = result[0]  # Unpack the first tuple
+            connect_spec = '''{
+                "openapi":"3.1.0",
+                "info":{
+                    "title":"HyperClovaX-BOT",
+                    "description":"네임서버에 등록 가능한 도메인인지 확인해 볼 수 있는 API입니다.",
+                    "version":"0.0.1",
+                    "x-logo":{"url":"https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"}
+                },
+                "servers": [ 
+                    { "url": "https://ai.didim365.com/hcxbot" } 
+                ]
+            }'''
+            
             return (connect_type, connect_spec)
         else: 
             return None
@@ -70,6 +85,7 @@ class QueryMetaDB:
         result = self.run(query, "one")
         if result:
             system_id, api_spec = result[0]  # Unpack the first tuple
+            # parsed_json = ast.literal_eval(api_spec)
             return (system_id, api_spec)
         else: 
             return None

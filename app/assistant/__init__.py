@@ -17,11 +17,11 @@ from langchain_community.chat_models import ChatHCX
 from langchain_community.embeddings import HCXEmbeddings
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_community.callbacks import HCXCallbackHandler
-from langchain_community.tools.requests.tool import (RequestsGetTool, RequestsPostTool, RequestsPatchTool, RequestsPutTool, RequestsDeleteTool)
 from langchain_community.tools.sql_database.tool import (QuerySQLDataBaseTool, InfoSQLDatabaseTool, ListSQLDatabaseTool, QuerySQLCheckerTool, )
 from langchain_community.utilities.sql_database import (SQLDatabase)
 
 from app.assistant.agent import AssistantAgent
+from app.assistant.tools.openapitool import OpenAPITool
 from app.assistant.tools.document_retriever_tool import create_retriever_tool as document_retriever_tool
 
 from app.config import Settings
@@ -89,7 +89,7 @@ def get_retriever_tool(embeddings: Embeddings, collection_name: str, config: Set
         collection_name, 
         "Searches and returns from milvus collection " + collection_name
     )
-
+    
 def get_sql(database_uri: str):
     return SQLDatabase.from_uri(database_uri=database_uri, engine_args={"echo":False})
 
@@ -123,8 +123,6 @@ def create_assistant_agent(
     embeddings = get_embeddings(config)
     datadb = SQLDatabase.from_uri(database_uri=config.data_uri)
     tools = [
-        RequestsGetTool(requests_wrapper=requests_wrapper),
-        RequestsPostTool(requests_wrapper=requests_wrapper),
         QuerySQLDataBaseTool(db=datadb),
         get_retriever_tool(embeddings, "domain_desc", config),
         get_retriever_tool(embeddings, "api_desc", config, "domain_id"),

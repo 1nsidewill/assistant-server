@@ -26,7 +26,6 @@ app.add_exception_handler(ValidationErrorException, validation_error_exception_h
 # Register handler for built-in HTTPException
 app.add_exception_handler(HTTPException, http_exception_handler)
 
-
 # Including Routers
 app.include_router(agent_router, prefix="/agent")
 app.include_router(crud_router, prefix="/crud") 

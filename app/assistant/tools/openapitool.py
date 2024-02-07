@@ -11,7 +11,6 @@ from langchain_community.utilities.requests import Requests
 
 from langchain.chains.api.openapi.chain import OpenAPIEndpointChain
 
-
 class OpenAPITool(Tool):
     """Open API Tool."""
 
