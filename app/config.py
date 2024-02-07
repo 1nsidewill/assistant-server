@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     metadb_DB: str
     metadb_USER: str
     metadb_PW: str
+
+    ## data mart uri
+    data_uri: str
     
     #NCloud Object Storage connect info
     service_name: str

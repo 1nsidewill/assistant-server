@@ -22,7 +22,7 @@ from langchain_community.tools.sql_database.tool import (QuerySQLDataBaseTool, I
 from langchain_community.utilities.sql_database import (SQLDatabase)
 
 from app.assistant.agent import AssistantAgent
-from app.assistant.document_retriever_tool import create_retriever_tool as document_retriever_tool
+from app.assistant.tools.document_retriever_tool import create_retriever_tool as document_retriever_tool
 
 from app.config import Settings
 
@@ -121,11 +121,11 @@ def create_assistant_agent(
 
     requests_wrapper = RequestsWrapper()
     embeddings = get_embeddings(config)
-    db = get_sql(config.metadb_uri)
+    datadb = SQLDatabase.from_uri(database_uri=config.data_uri)
     tools = [
         RequestsGetTool(requests_wrapper=requests_wrapper),
         RequestsPostTool(requests_wrapper=requests_wrapper),
-        QuerySQLDataBaseTool(db=db),
+        QuerySQLDataBaseTool(db=datadb),
         get_retriever_tool(embeddings, "domain_desc", config),
         get_retriever_tool(embeddings, "api_desc", config, "domain_id"),
         get_retriever_tool(embeddings, "chunk_text", config),
@@ -133,8 +133,6 @@ def create_assistant_agent(
     agent = AssistantAgent.from_llm_and_tools(
         llm=llm,
         tools=tools,
-        # init metadb
-        metadb_uri=config.metadb_uri,
         callbacks=callbacks,
         kwargs=kwargs,
     )

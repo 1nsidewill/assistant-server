@@ -142,7 +142,6 @@ class AssistantAgent(BaseSingleActionAgent):
         cls,
         llm: BaseLanguageModel,
         tools: Sequence[BaseTool],
-        metadb_uri: str,
         callbacks: Optional[List[BaseCallbackHandler]] = None,
         **kwargs: Any,
     ) -> BaseSingleActionAgent:
@@ -150,7 +149,6 @@ class AssistantAgent(BaseSingleActionAgent):
         return cls(
             llm = llm,
             tools=tools,
-            metadb_uri=metadb_uri,
             allowed_tools=[tool.name for tool in tools],
             callbacks=callbacks,
             **kwargs,

@@ -3,7 +3,7 @@ import json
 from langchain_community.chat_models import ChatHCX
 # from langchain.globals import (set_debug)
 
-from openapitool import (OpenAPITool, OpenAPISpec)
+from app.assistant.tools.openapitool import (OpenAPITool, OpenAPISpec)
 
 # set_debug(True)
 

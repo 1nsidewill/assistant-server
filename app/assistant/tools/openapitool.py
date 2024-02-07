@@ -28,7 +28,11 @@ class OpenAPITool(Tool):
             " and I'll assist via an API with description:"
             f" {chain.api_operation.description}"
         )
-        return cls(name=expanded_name, func=chain.run, description=description)
+        return cls(
+            name=expanded_name, 
+            func=chain.run, 
+            description=description
+        )
 
     @classmethod
     def from_llm_and_method(
