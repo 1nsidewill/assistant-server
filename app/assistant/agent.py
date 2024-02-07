@@ -13,32 +13,7 @@ from langchain.agents.agent import (BaseSingleActionAgent, AgentExecutor)
 from langchain.chains import (LLMChain)
 from langchain.agents.utils import (validate_tools_single_input)
 from langchain.callbacks.manager import (Callbacks)
-
 from app.crud.metadb import QueryMetaDB
-# from langchain_community.utilities.sql_database import (SQLDatabase)
-
-# class QueryMetaDB():
-#     """query system, api, prompt from database"""
-
-#     prompt: Dict[str, str] = {
-#         "FILL_API_CALL": 100000001,
-#         "FILL_SQL_QUERTY": 100000002,
-#     }
-#     """system ptompt id list"""
-#     db: Optional[SQLDatabase] = None
-#     """meta database query engin"""
-
-#     @classmethod
-#     def from_uri(self, uri: str):
-#         self.db = SQLDatabase.from_uri(database_uri=uri, engine_args={"echo":False})
-
-#     def get_system(self, id: str) -> str:
-#         return self.db.run("select connect_type, connect_spec from api_system where system_id = {id} and status = 'Y'".format(id), "one")
-#     def get_api(self, id: str) -> str:
-#         return self.db.run("select system_id, api_spec from api_spec where api_id = {id} and status = 'Y'".format(id), "one")
-#     def get_prompt(self, id: str) -> str:
-#         return self.db.run("select prompt_text from prompt where prompt_id = {id} and status = 'Y'".format(id), "one")
-
 
 class AssistantAgent(BaseSingleActionAgent):
     """Agent powered by didm365."""
