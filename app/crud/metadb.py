@@ -75,7 +75,8 @@ class QueryMetaDB:
             return None
     
     def get_prompt(self, id: str) -> str:
-        return self.run("select prompt_text from prompt where prompt_id = {id} and status = 'Y'".format(id), "one")
+        query = f"select prompt_text from prompt where prompt_id = {id} and status = 'Y'"
+        return self.run(query, "one")
     
     def get_domain_list(self) -> Dict[str, Any]:
         rows = self.run("select domain_id, domain_name, domain_desc from domain", "many")
