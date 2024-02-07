@@ -1,5 +1,5 @@
 #config import
-from config import Settings
+from app.config import get_settings
 #text loader
 from langchain.docstore.document import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -11,9 +11,11 @@ from pymilvus import connections, CollectionSchema, FieldSchema, DataType, Colle
 #postgresql connect import
 import psycopg2
 
+from app.crud import schema
 
 
-conf = Settings()
+
+conf = get_settings()
 
 #Milvus connect info
 HOST = conf.milvus_host
@@ -31,11 +33,11 @@ postgre_PW = conf.postgre_PW
 
 #Hyper Clover X connect info
 hcx_mode = conf.hcx_mode
-hcx_app_id = conf.hcx_app_id
+hcx_app_id = conf.emb_app_id
 hcx_model_name = conf.hcx_model_name
-hcx_api_base = conf.hcx_api_base
-hcx_clovastudio_api_key = conf.hcx_clovastudio_api_key
-hcx_apigw_api_key = conf.hcx_apigw_api_key
+hcx_api_base = conf.emb_api_base
+hcx_clovastudio_api_key = conf.emb_clovastudio_api_key
+hcx_apigw_api_key = conf.emb_apigw_api_key
 
 #Milvus connect info
 milvus_HOST = conf.milvus_host
@@ -46,7 +48,6 @@ milvus_PW = conf.milvus_password
 
 #Milvus collection info
 milvus_collection_name = "domain_desc"
-
 
 # ==================================================================
 # search uploading file data into postgresql 
@@ -123,9 +124,20 @@ def split_documents(gdocuments):
     return split_doc
 
 # ==================================================================
+# create id data for Milvus
+# ==================================================================
+def create_ids(insert_docs, field_name):
+    print("Create ID Start!!")    
+    ids = []
+    for doc in insert_docs:                
+        ids.append(str(doc.metadata[field_name]))
+    print("Create ID Finish!!")
+    return ids
+
+# ==================================================================
 # Connect Milvus
 # ==================================================================
-def connect_milvus():    
+def connect_milvus(collection_name, partition_names=None):    
     #get hcx embedding
     embeddings = HCXEmbeddings(
         app_id=hcx_app_id,
@@ -136,12 +148,20 @@ def connect_milvus():
     )
     
     #connect milvus
-    vector_db = Milvus(
-        embeddings,
-        connection_args={"host":milvus_HOST, "port":milvus_PORT, "user":milvus_USER, "password":milvus_PW, "db_name":milvus_Database},
-        collection_name = milvus_collection_name,
-        #collection_name = "langtest",
-    )
+    if partition_names is not None:
+        vector_db = Milvus(
+            embeddings,
+            connection_args={"host":milvus_HOST, "port":milvus_PORT, "user":milvus_USER, "password":milvus_PW, "db_name":milvus_Database},
+            collection_name = collection_name,
+            partition_names=partition_names
+        )
+    else:
+        vector_db = Milvus(
+            embeddings,
+            connection_args={"host":milvus_HOST, "port":milvus_PORT, "user":milvus_USER, "password":milvus_PW, "db_name":milvus_Database},
+            collection_name = collection_name,
+        )
+        
     print("Milvus Connect !!")
     return vector_db
 
@@ -149,16 +169,16 @@ def connect_milvus():
 # ==================================================================
 # insert data into Milvus
 # ==================================================================
-def insert_milvus(gvector_db, ginsert_docs):
+def insert_milvus(gvector_db, ginsert_docs, gids):
     print("Insert Data into Milvus Start!!")    
-    gvector_db.add_documents(ginsert_docs)
+    gvector_db.add_documents(ginsert_docs, ids=gids)
     print("Insert Data into Milvus Finish!!")
 
 
 # ==================================================================
 # recreate Milvus collection
 # ==================================================================
-def recreate_milvus_collection():
+def recreate_milvus_collection(collection_name):
     print("Milvus Connect Start!!")
     connections.connect(    
         user=USER,
@@ -168,71 +188,126 @@ def recreate_milvus_collection():
         db_name=database,
     )
 
-    utility.drop_collection(milvus_collection_name)
+    utility.drop_collection(collection_name)
 
-    #collection schema   
-    pk = FieldSchema(
-    name="pk",
-    dtype=DataType.INT64,
-    is_primary=True,    
-    auto_id=True,
-    ) 
-    vector = FieldSchema(
-    name="vector",
-    dtype=DataType.FLOAT_VECTOR,
-    dim=1024,
-    )
-    domain_id = FieldSchema(
-    name="domain_id",
-    dtype=DataType.INT64,
-    )
-    text = FieldSchema(
-    name="text",
-    dtype=DataType.VARCHAR,
-    max_length=1024,
-    )
-    name = FieldSchema(
-    name="name",
-    dtype=DataType.VARCHAR,
-    max_length=256,
-    )
-    schema = CollectionSchema(
-        fields=[pk, vector, domain_id, text, name],
-        description="domain milvus collection",
-        enable_dynamic_field=True,
-    )
+    if collection_name == "domain_desc":
+        #collection schema   
+        pk = FieldSchema(
+        name="pk",
+        #dtype=DataType.INT64,
+        dtype=DataType.VARCHAR,
+        max_length=512,
+        is_primary=True,    
+        #auto_id=True,
+        ) 
+        vector = FieldSchema(
+        name="vector",
+        dtype=DataType.FLOAT_VECTOR,
+        dim=1024,
+        )
+        domain_id = FieldSchema(
+        name="domain_id",
+        dtype=DataType.INT64
+        )
+        text = FieldSchema(
+        name="text",
+        dtype=DataType.VARCHAR,
+        max_length=1024,
+        )
+        name = FieldSchema(
+        name="name",
+        dtype=DataType.VARCHAR,
+        max_length=256,
+        )
+        schema = CollectionSchema(
+            fields=[pk, vector, domain_id, text, name],
+            description="domain milvus collection",
+            enable_dynamic_field=True,
+        )
 
-    collection = Collection(    
-        name = milvus_collection_name,
-        schema=schema,
-        using='default',
-        shards_num=2,    
-    )
+        collection = Collection(    
+            name = collection_name,
+            schema=schema,
+            using='default',
+            shards_num=2,    
+        )
 
-    # index create
-    index = {
-        "index_type": "IVF_FLAT",
-        "metric_type": "L2",
-        "params": {"nlist": 1024},
-    }
-    collection.create_index("vector", index)
-    print("File Input Collection Create Finish!!")
+        # index create
+        index = {
+            "index_type": "IVF_FLAT",
+            "metric_type": "L2",
+            "params": {"nlist": 1024},
+        }
+        collection.create_index("vector", index)
+        print("File Input Collection Create Finish!!")
+    elif collection_name == "api_desc":
+        #collection schema   
+        pk = FieldSchema(
+        name="pk",
+        #dtype=DataType.INT64,
+        dtype=DataType.VARCHAR,
+        max_length=512,
+        is_primary=True,    
+        #auto_id=True,
+        ) 
+        vector = FieldSchema(
+        name="vector",
+        dtype=DataType.FLOAT_VECTOR,
+        dim=1024,
+        )
+        api_id = FieldSchema(
+        name="api_id",
+        dtype=DataType.INT64,
+        )
+        text = FieldSchema(
+        name="text",
+        dtype=DataType.VARCHAR,
+        max_length=2048,
+        )
+        domain_id = FieldSchema(
+        name="domain_id",
+        dtype=DataType.INT64
+        )
+        # spec = FieldSchema(
+        # name="spec",
+        # dtype=DataType.VARCHAR,
+        # max_length=4096,
+        # )
+        # system_id = FieldSchema(
+        # name="system_id",
+        # dtype=DataType.INT64,
+        # )
+        
+        schema = CollectionSchema(
+            fields=[pk, vector, api_id, text, domain_id],
+            description="api_spec milvus collection",
+            enable_dynamic_field=True,
+            partition_key_field="domain_id"
+        )
 
-#connect milvus
-vector_db = connect_milvus()
-#recreate milvus collection(domain_desc)
-#recreate_milvus_collection()
-#get domain list in postgresql
-domain_list = check_domain_in_pg()
+        collection = Collection(    
+            name = collection_name,
+            schema=schema,
+            using='default',
+            shards_num=2,    
+        )
 
-#create domain document list
-documents = create_domain_document(domain_list)
-split_documents = split_documents(documents)
+        # index create
+        index = {
+            "index_type": "IVF_FLAT",
+            "metric_type": "L2",
+            "params": {"nlist": 1024},
+        }
+        
+        collection.create_index("vector", index)
+        collection.load()
+        print("File Input Collection Create Finish!!")        
 
-print(split_documents)
 
-#insert_milvus(vector_db, documents)
-insert_milvus(vector_db, split_documents)
-
-
-
+def insert_test_data(item:schema.ApiDescItem):
+    documents = []
+    document = Document(page_content=item.text, metadata={"source":"database", "domain_id":item.domain_id, "api_id":item.api_id, "text":item.text})
+        #print(document)
+    documents.append(document)
+    
+    return documents

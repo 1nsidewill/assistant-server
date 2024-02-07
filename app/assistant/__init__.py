@@ -22,6 +22,7 @@ from langchain_community.tools.sql_database.tool import (QuerySQLDataBaseTool, I
 from langchain_community.utilities.sql_database import (SQLDatabase)
 
 from app.assistant.agent import AssistantAgent
+from app.assistant.document_retriever_tool import create_retriever_tool as document_retriever_tool
 
 from app.config import Settings
 
@@ -67,7 +68,7 @@ def get_callback(config: Settings):
         )
     return config._callback
 
-def get_retriever_tool(embeddings: Embeddings, collection_name: str, config: Settings):
+def get_retriever_tool(embeddings: Embeddings, collection_name: str, config: Settings, partition_key=""):
     connection_args = {
         "host": config.milvus_host,
         "port": config.milvus_port,
@@ -80,8 +81,10 @@ def get_retriever_tool(embeddings: Embeddings, collection_name: str, config: Set
         embedding_function = (embeddings or get_embeddings(config)),
         collection_name = collection_name or config.milvus_collection,
         drop_old = False,
+        # Add Partition key Field
+        partition_key_field = partition_key if partition_key != "" else {}
     )
-    return create_retriever_tool(
+    return document_retriever_tool(
         vectorstore.as_retriever(), 
         collection_name, 
         "Searches and returns from milvus collection " + collection_name
@@ -124,12 +127,13 @@ def create_assistant_agent(
         RequestsPostTool(requests_wrapper=requests_wrapper),
         QuerySQLDataBaseTool(db=db),
         get_retriever_tool(embeddings, "domain_desc", config),
-        get_retriever_tool(embeddings, "api_desc", config),
+        get_retriever_tool(embeddings, "api_desc", config, "domain_id"),
         get_retriever_tool(embeddings, "chunk_text", config),
     ]
     agent = AssistantAgent.from_llm_and_tools(
         llm=llm,
         tools=tools,
+        # init metadb
         metadb_uri=config.metadb_uri,
         callbacks=callbacks,
         kwargs=kwargs,

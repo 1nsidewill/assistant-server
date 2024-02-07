@@ -44,6 +44,7 @@ url_object = URL.create(
     port=server['port'],
     database=server['name'],
 )
+
 from langchain.sql_database import SQLDatabase
 db = SQLDatabase.from_uri(database_uri=url_object)
 
@@ -105,9 +106,11 @@ chain = LLMChain(
     prompt=prompt,
     llm=llm,
 )
+
 sql_input = chain.invoke(input={"schema":api_spec, "args":{"id":"1"}})
 print(sql_input)
 
 tool = tools[tool_names.index("sql_db_query")]
 result = tool.run(sql_input['text'])
+
 print(result)

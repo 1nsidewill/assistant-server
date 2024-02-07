@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from starlette.middleware.sessions import SessionMiddleware
+# from starlette.middleware.sessions import SessionMiddleware
 from app.config import Settings
 from app.routers import agent_router, crud_router
 from app.exceptions import (
@@ -16,8 +16,8 @@ import uvicorn
 # Initiate app
 app = FastAPI(title=Settings().app_name)
 
-# Session Management
-app.add_middleware(SessionMiddleware, secret_key="your_secret_key")
+# # Session Management
+# app.add_middleware(SessionMiddleware, secret_key="your_secret_key")
 
 # Register custom exception handlers
 app.add_exception_handler(ItemNotFoundException, item_not_found_exception_handler)
