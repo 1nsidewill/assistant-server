@@ -222,4 +222,3 @@ class AssistantAgent(BaseSingleActionAgent):
         inputs = {**kwargs, **{"intermediate_steps": intermediate_steps}}
         output = await self._anext(inputs, config={"callbacks": callbacks or self.callbacks})
         return output
-
