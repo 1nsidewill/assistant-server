@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "chat_server"
+name = "assistant-server"
 version = "0.0.1"
 description = ""
 authors = ["Eric Yoo <suyoo@didim365.com>"]
