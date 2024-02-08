@@ -1,4 +1,4 @@
-from typing import (Any, Optional, Dict)
+from typing import (Any, Optional, Dict, Union, Tuple, List)
 
 from langchain_core.language_models import (BaseLanguageModel)
 from langchain_core.tools import (Tool)
@@ -38,12 +38,16 @@ SQL_STATEMENT:
 class SQLCallTool(Tool):
     """SQL Call Tool."""
 
+    datadb: SQLDatabase
+    chain: LLMChain
+
     def _run(
         self,
         *args: Any,
         **kwargs: Any,
     ) -> Any:
-        ...
+        print(args)
+        print(kwargs)
 
     @classmethod
     def from_llm_and_spec(
