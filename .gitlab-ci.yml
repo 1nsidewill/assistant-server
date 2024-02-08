@@ -8,7 +8,7 @@ variables:
   GITLAB_DEBUG: "true"
 
 include:
-  # - project: 'didim365/CiCD-Modeule'
+  # - project: 'didim365/CiCD-Module'
   #   file: 'update_requirements.yml'
-  - project: 'didim365/CiCD-Modeule'
-    file: 'trigger_downstream.yml'
+  - project: 'didim365/CiCD-Module'
+    file: 'trigger_downstream.yml' 
