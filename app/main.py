@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 # from starlette.middleware.sessions import SessionMiddleware
 from app.config import Settings
-from app.routers import agent_router, crud_router
+from app.routers import assistant_router, crud_router
 from app.exceptions import (
     ItemNotFoundException,
     ValidationErrorException,
@@ -27,7 +27,7 @@ app.add_exception_handler(ValidationErrorException, validation_error_exception_h
 app.add_exception_handler(HTTPException, http_exception_handler)
 
 # Including Routers
-app.include_router(agent_router, prefix="/agent")
+app.include_router(assistant_router, prefix="/assistant")
 app.include_router(crud_router, prefix="/crud") 
 
 if __name__ == "__main__":

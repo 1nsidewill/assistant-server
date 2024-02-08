@@ -56,13 +56,14 @@ class AssistantAgent(BaseSingleActionAgent):
     
     def _next(self, observation: Dict[str, Any], config: Dict[str, Any]) -> Union[AgentAction, AgentFinish]:
         response = {}
-        response['query'] = observation['query']
+        query = observation['query']
+        response['query'] = query
         
         """Parse text into agent action/finish."""
         intermediate_steps = observation.pop("intermediate_steps", None)
         if len(intermediate_steps) == 0:
             # 1. 처음 들어올 때
-            return AgentAction(tool="domain_desc", tool_input=observation, log="find domain from vectorstore(domain_desc)", kwargs=config)
+            return AgentAction(tool="domain_desc", tool_input=query, log="find domain from vectorstore(domain_desc)", kwargs=config)
         else:
             intermediate = intermediate_steps[-1]
             agent_action:AgentAction  = intermediate[0]

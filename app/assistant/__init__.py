@@ -114,6 +114,8 @@ def get_embeddings(config: Settings):
         app_id=config.emb_app_id,
         callbacks=[get_callback(config)],
     )
+    
+    
 
 def create_assistant_agent(
     config: Settings,
@@ -130,9 +132,9 @@ def create_assistant_agent(
     datadb = SQLDatabase.from_uri(database_uri=config.data_uri)
     tools = [
         QuerySQLDataBaseTool(db=datadb),
-        get_retriever_tool(embeddings, "domain_desc", config, thresholds.domain_threshold),
-        get_retriever_tool(embeddings, "api_desc", config, thresholds.api_threshold, "domain_id"),
-        get_retriever_tool(embeddings, "chunk_text", config, thresholds.chunk_text_thresold),
+        get_retriever_tool(embeddings, "domain_desc", config, thresholds["domain_desc"]),
+        get_retriever_tool(embeddings, "api_desc", config, thresholds["api_desc"], "domain_id"),
+        get_retriever_tool(embeddings, "chunk_text", config, thresholds["chunk_text"]),
     ]
     agent = AssistantAgent.from_llm_and_tools(
         llm=llm,
