@@ -5,3 +5,4 @@
 .gitlab-ci.yml
 .dockerignore
 Dockerfile
+poetry.lock
