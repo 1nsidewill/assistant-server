@@ -11,7 +11,12 @@ class ItemNotFoundException(HTTPException):
 class ValidationErrorException(HTTPException):
     def __init__(self, detail: str):
         super().__init__(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
-
+        
+class NothingToRespondException(HTTPException):
+    def __init__(self):
+        detail = "No answer to return"
+        super().__init__(status_code=status.HTTP_204_NO_CONTENT, detail=detail)
+        
 # Exception Handlers
 async def item_not_found_exception_handler(request: Request, exc: ItemNotFoundException):
     return JSONResponse(
@@ -22,6 +27,12 @@ async def item_not_found_exception_handler(request: Request, exc: ItemNotFoundEx
 async def validation_error_exception_handler(request: Request, exc: ValidationErrorException):
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"message": exc.detail},
+    )
+
+async def nothing_to_respond_exception_handler(request: Request, exc: NothingToRespondException):
+    return JSONResponse(
+        status_code=status.HTTP_204_NO_CONTENT,
         content={"message": exc.detail},
     )
 

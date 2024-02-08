@@ -1,8 +1,9 @@
 from fastapi import APIRouter
 from app.assistant import create_assistant_agent
 from app.config import Settings
-from app.crud import milvus, schema
+from app.crud import milvus
 from app.exceptions import *
+from app import schema
 
 router = APIRouter()
 

@@ -11,7 +11,7 @@ from pymilvus import connections, CollectionSchema, FieldSchema, DataType, Colle
 #postgresql connect import
 import psycopg2
 
-from app.crud import schema
+from app import schema
 from app.crud.metadb import QueryMetaDB
 
 

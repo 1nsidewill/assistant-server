@@ -63,19 +63,7 @@ class QueryMetaDB:
         result = self.run(query, "one")
         if result:
             connect_type, connect_spec = result[0]  # Unpack the first tuple
-            connect_spec = '''{
-                "openapi":"3.1.0",
-                "info":{
-                    "title":"HyperClovaX-BOT",
-                    "description":"네임서버에 등록 가능한 도메인인지 확인해 볼 수 있는 API입니다.",
-                    "version":"0.0.1",
-                    "x-logo":{"url":"https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"}
-                },
-                "servers": [ 
-                    { "url": "https://ai.didim365.com/hcxbot" } 
-                ]
-            }'''
-            
+                        
             return (connect_type, connect_spec)
         else: 
             return None
