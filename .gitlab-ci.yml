@@ -10,5 +10,5 @@ variables:
 include:
   # - project: 'didim365/CiCD-Modeule'
   #   file: 'update_requirements.yml'
-  - project: 'didim365/CiCD-Modul'
+  - project: 'didim365/CiCD-Modeule'
     file: 'trigger_downstream.yml'
