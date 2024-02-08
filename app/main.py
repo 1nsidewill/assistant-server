@@ -29,3 +29,7 @@ app.add_exception_handler(HTTPException, http_exception_handler)
 # Including Routers
 app.include_router(agent_router, prefix="/agent")
 app.include_router(crud_router, prefix="/crud") 
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8005)

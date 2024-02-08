@@ -1,0 +1,14 @@
+stages:  
+  # - update_requirements
+  - trigger_downstream
+  
+variables:
+  APP_NAME: "assistant-server"
+  HELM_DIRECTORY: "helm_charts/assistant-server"
+  GITLAB_DEBUG: "true"
+
+include:
+  # - project: 'didim365/CiCD-Modeule'
+  #   file: 'update_requirements.yml'
+  - project: 'didim365/CiCD-Modul'
+    file: 'trigger_downstream.yml'
