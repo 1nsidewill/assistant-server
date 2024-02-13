@@ -6,9 +6,10 @@ from langchain_core.callbacks import (BaseCallbackHandler)
 from langchain_core.documents import (Document)
 from langchain_core.language_models import (BaseLanguageModel)
 from langchain_core.embeddings import (Embeddings)
-from langchain_core.prompts import (ChatPromptTemplate)
+from langchain_core.prompts import (ChatPromptTemplate, PromptTemplate)
 from langchain_core.vectorstores import (VectorStore)
 from langchain_core.tools import (BaseTool)
+from langchain_core.output_parsers import (StrOutputParser)
 from langchain_community.utilities.sql_database import (SQLDatabase)
 
 from langchain.agents.agent import (BaseSingleActionAgent, AgentExecutor)
@@ -18,6 +19,7 @@ from langchain.callbacks.manager import (Callbacks)
 from app.crud.metadb import QueryMetaDB
 from app.assistant.tools.openapitool import (OpenAPITool, OpenAPISpec)
 from app.assistant.tools.sqltool import SQLCallTool
+from app.assistant.templates import AgentTemplates
 
 class AssistantAgent(BaseSingleActionAgent):
     """Agent powered by didm365."""
@@ -69,6 +71,7 @@ class AssistantAgent(BaseSingleActionAgent):
             agent_action:AgentAction  = intermediate[0]
             # 2. domain 조회 후
             if agent_action.tool == "domain_desc":
+                response['stage'] = 'check_domain'
                 docs: List[Document] = intermediate[-1]
                 if len(docs) > 0:
                     observation.update({"domain": docs[0].page_content})
@@ -77,6 +80,7 @@ class AssistantAgent(BaseSingleActionAgent):
                     return AgentFinish(return_values=response, log="cant find domain from vectorstore(domain_desc)")
             # 3. api_spec 조회 후
             elif agent_action.tool == "api_desc":
+                response['stage'] = 'check_api'
                 docs: List[Document] = intermediate[-1]
                 if len(docs) > 0:
                     api_id = docs[0].metadata['api_id']
@@ -90,6 +94,8 @@ class AssistantAgent(BaseSingleActionAgent):
 
                     try:                                         
                         if connect_type == "REST":
+                            response['stage'] = 'api_call'
+                            
                             api_tool = OpenAPITool.from_llm_and_method(
                                 llm=self.llm,
                                 path=path,
@@ -99,10 +105,11 @@ class AssistantAgent(BaseSingleActionAgent):
                             
                             result = api_tool.run(observation)
                             response['query_response'] = result
-                            response['stage'] = 'api_call'
                             
                             return AgentFinish(return_values=response, log="agent end with api_call")
                         elif connect_type == "SQL":
+                            response['stage'] = 'sql_call'
+                            
                             service: dict = json.loads(system_spec)
                             server = service['servers'][0]
                             from sqlalchemy import URL
@@ -123,7 +130,6 @@ class AssistantAgent(BaseSingleActionAgent):
                         
                             result = sql.invoke(input={"schema":api_spec, "args":{"id":api_id}})
                             response['query_response'] = result
-                            response['stage'] = 'sql_call'
                             
                             return AgentFinish(return_values=response, log="agent end with sql_call")
                     except Exception as e:
@@ -132,11 +138,18 @@ class AssistantAgent(BaseSingleActionAgent):
                     return AgentAction(tool="chunk_text", tool_input=observation, log="find docs text from vectorstore(chunk_text)", kwargs=config)
             # 5. docs text 조회 후
             elif agent_action.tool == "chunk_text":
+                response['stage'] = 'chunk_text'
                 docs: List[Document] = intermediate[-1]
                 if len(docs) > 0:
-                    observation.update({"api": docs[0].page_content})
-                    result = LLMChain().invoke(input) # chunk text -> Call 준비
-                    return AgentFinish(return_values=result, log="agent end with docs text")
+                    atmp = AgentTemplates('rag')
+                    context = atmp.get_context_with_documents(docs)
+                    prompt = atmp.get_prompt()
+                    chain = prompt | self.llm | StrOutputParser()
+                    
+                    result = chain.invoke({"context":context, "question": query})
+                    response['query_response'] = result
+                    
+                    return AgentFinish(return_values=response, log="agent end with docs text")
                 else:
                     return AgentFinish(return_values=response, log="cant find data from vectorstore(api_desc or chunk_text)")
 

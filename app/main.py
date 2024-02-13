@@ -2,14 +2,8 @@ from fastapi import FastAPI, HTTPException
 # from starlette.middleware.sessions import SessionMiddleware
 from app.config import Settings
 from app.routers import assistant_router, crud_router
-from app.exceptions import (
-    ItemNotFoundException,
-    ValidationErrorException,
-    item_not_found_exception_handler,
-    validation_error_exception_handler,
-    http_exception_handler,
+from app.exceptions import *
     # Import other exceptions and handlers as needed
-)
 import uvicorn
 
 
@@ -21,6 +15,7 @@ app = FastAPI(title=Settings().app_name)
 
 # Register custom exception handlers
 app.add_exception_handler(ItemNotFoundException, item_not_found_exception_handler)
+app.add_exception_handler(NothingToRespondException, nothing_to_respond_exception_handler)
 app.add_exception_handler(ValidationErrorException, validation_error_exception_handler)
 
 # Register handler for built-in HTTPException
