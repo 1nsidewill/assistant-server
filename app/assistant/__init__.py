@@ -106,13 +106,14 @@ def get_chatllm(config: Settings):
         callbacks=[get_callback(config)],
     )
     
-def get_embeddings(config: Settings):
+def get_embeddings(config: Settings, max_tokens: int):
     return HCXEmbeddings(
         api_base=config.emb_api_base, 
         clovastudio_api_key=config.emb_clovastudio_api_key,
         apigw_api_key=config.emb_apigw_api_key,
         app_id=config.emb_app_id,
         callbacks=[get_callback(config)],
+        max_tokens=max_tokens
     )
     
     
@@ -121,6 +122,7 @@ def create_assistant_agent(
     config: Settings,
     thresholds: dict[str, float | None],
     top_k: int = 1,
+    max_tokens: int = 2048,
     verbose: bool = False,
     **kwargs: Any,
 ) -> AgentExecutor:
@@ -129,12 +131,12 @@ def create_assistant_agent(
     callbacks = [get_callback(config)]
 
     requests_wrapper = RequestsWrapper()
-    embeddings = get_embeddings(config)
+    embeddings = get_embeddings(config, max_tokens)
     datadb = SQLDatabase.from_uri(database_uri=config.data_uri)
     tools = [
         QuerySQLDataBaseTool(db=datadb),
         get_retriever_tool(embeddings, "domain_desc", config, thresholds["domain_desc"], top_k=1),
-        get_retriever_tool(embeddings, "api_desc", config, thresholds["api_desc"], "domain_id", top_k=1),
+        get_retriever_tool(embeddings, "api_desc", config, thresholds["api_desc"], "domain_id", top_k=2),
         get_retriever_tool(embeddings, "chunk_text", config, thresholds["chunk_text"], top_k=top_k),
     ]
     agent = AssistantAgent.from_llm_and_tools(

@@ -87,13 +87,13 @@ class AssistantAgent(BaseSingleActionAgent):
                     (system_id, api_spec)= self.metadb.get_api(api_id)
                     (connect_type, system_spec)= self.metadb.get_system(system_id)
                     
-                    app_api_spec: dict = json.loads(system_spec)
-                    app_api_spec.update(dict(json.loads(api_spec)))
-                    path = list(app_api_spec['paths'].keys())[0]
-                    method = list(app_api_spec['paths'][path].keys())[0]
-
                     try:                                         
                         if connect_type == "REST":
+                            app_api_spec: dict = json.loads(system_spec)
+                            app_api_spec.update(dict(json.loads(api_spec)))
+                            path = list(app_api_spec['paths'].keys())[0]
+                            method = list(app_api_spec['paths'][path].keys())[0]
+
                             response['stage'] = 'api_call'
                             
                             api_tool = OpenAPITool.from_llm_and_method(
@@ -128,7 +128,6 @@ class AssistantAgent(BaseSingleActionAgent):
                                 datadb=self.datadb,
                             )
                         
-                            result = sql.invoke(input={"schema":api_spec, "args":{"id":api_id}})
                             response['query_response'] = result
                             
                             return AgentFinish(return_values=response, log="agent end with sql_call")
@@ -138,7 +137,7 @@ class AssistantAgent(BaseSingleActionAgent):
                     return AgentAction(tool="chunk_text", tool_input=observation, log="find docs text from vectorstore(chunk_text)", kwargs=config)
             # 5. docs text 조회 후
             elif agent_action.tool == "chunk_text":
-                response['stage'] = 'chunk_text'
+                response['stage'] = 'RAG'
                 docs: List[Document] = intermediate[-1]
                 if len(docs) > 0:
                     atmp = AgentTemplates('rag')
@@ -148,6 +147,7 @@ class AssistantAgent(BaseSingleActionAgent):
                     
                     result = chain.invoke({"context":context, "question": query})
                     response['query_response'] = result
+                    response['used_context'] = context
                     
                     return AgentFinish(return_values=response, log="agent end with docs text")
                 else:

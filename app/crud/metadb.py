@@ -47,7 +47,7 @@ class QueryMetaDB:
         res = [
             {
                 # column: truncate_word(value, length=self.__class__.db._max_string_length)
-                column: truncate_word(value, length=3000)
+                column: truncate_word(value, length=6000)
                 for column, value in r.items()
             }
             for r in result

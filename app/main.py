@@ -3,12 +3,16 @@ from fastapi import FastAPI, HTTPException
 from app.config import Settings
 from app.routers import assistant_router, crud_router
 from app.exceptions import *
-    # Import other exceptions and handlers as needed
+# Import other exceptions and handlers as needed
 import uvicorn
 
 
 # Initiate app
 app = FastAPI(title=Settings().app_name)
+
+# Including Routers
+app.include_router(assistant_router, prefix="/assistant")
+app.include_router(crud_router, prefix="/crud") 
 
 # # Session Management
 # app.add_middleware(SessionMiddleware, secret_key="your_secret_key")
@@ -18,12 +22,8 @@ app.add_exception_handler(ItemNotFoundException, item_not_found_exception_handle
 app.add_exception_handler(NothingToRespondException, nothing_to_respond_exception_handler)
 app.add_exception_handler(ValidationErrorException, validation_error_exception_handler)
 
-# Register handler for built-in HTTPException
 app.add_exception_handler(HTTPException, http_exception_handler)
 
-# Including Routers
-app.include_router(assistant_router, prefix="/assistant")
-app.include_router(crud_router, prefix="/crud") 
 
 if __name__ == "__main__":
     import uvicorn

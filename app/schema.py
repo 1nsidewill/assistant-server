@@ -1,13 +1,15 @@
 from pydantic import BaseModel, Field, validator
-from typing import Optional
+from typing import Optional, Required
 
 # Main Query For Assistant
 class AssistantQueryItem(BaseModel):
     query: str
     
-    rag_top_k: Optional[int] = 3
+    # HCX Options
+    rag_top_k: Optional[int] = Field(default=3)
+    max_tokens: Optional[int] = Field(default=2048)
     
-    default_threshold: Optional[float] = None
+    default_threshold: float = 0.3
     domain_threshold: Optional[float] = Field(None)
     api_threshold: Optional[float] = Field(None)
     chunk_text_threshold: Optional[float] = Field(None)

@@ -28,7 +28,7 @@ api_spec: str = '''{
                     }, 
                     "description": "api spec을 조회 할 PK"
                 }
-            ], 
+            ]
         }
     }
 }'''

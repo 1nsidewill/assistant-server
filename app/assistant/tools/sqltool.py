@@ -53,14 +53,14 @@ class SQLCallTool(Tool):
     def from_llm_and_spec(
         cls,
         llm: BaseLanguageModel,
-        spec: Dict[str, Any],
+        spec: str = None,
         datadb: Optional[SQLDatabase] = None,
         verbose: bool = False,
         **kwargs: Any,
     ) -> "SQLCallTool":
         prompt = PromptTemplate(
             template=sql_template,
-            input_variables=["schma", "instructions", "args"]
+            input_variables=["schema", "instructions", "args"]
         )
         chain = LLMChain(
             prompt=prompt,
@@ -74,18 +74,7 @@ class SQLCallTool(Tool):
                 raise ValueError("'data_uri' must be provided in .env.")
             datadb = SQLDatabase.from_uri(conf.data_uri)
 
-        title = spec.info.title
-        expanded_name = (
-            f'{title.replace(" ", "_")}'
-        )
-        description = (
-            f"I'm an AI from {title}. Instruct what you want,"
-            " and I'll assist via an SQL with description:"
-            f" {chain.description}"
-        )
         return cls(
             datadb=datadb,
             chain=chain,
-            name=expanded_name,
-            description=description
         )
