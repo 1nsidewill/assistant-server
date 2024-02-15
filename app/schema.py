@@ -10,9 +10,9 @@ class AssistantQueryItem(BaseModel):
     max_tokens: Optional[int] = Field(default=2048)
     
     default_threshold: float = 0.3
-    domain_threshold: Optional[float] = Field(None)
-    api_threshold: Optional[float] = Field(None)
-    chunk_text_threshold: Optional[float] = Field(None)
+    domain_threshold: Optional[float] = 0
+    api_threshold: Optional[float] = 0
+    chunk_text_threshold: Optional[float] = 0
 
     class Config:
         allow_population_by_field_name = True
@@ -21,9 +21,9 @@ class AssistantQueryItem(BaseModel):
     def thresholds(self):
         # Check each threshold individually, fall back to default_threshold if None
         return {
-            "domain_desc": self.domain_threshold if self.domain_threshold is not None else self.default_threshold,
-            "api_desc": self.api_threshold if self.api_threshold is not None else self.default_threshold,
-            "chunk_text": self.chunk_text_threshold if self.chunk_text_threshold is not None else self.default_threshold,
+            "domain_desc": self.domain_threshold if self.domain_threshold != 0 else self.default_threshold,
+            "api_desc": self.api_threshold if self.api_threshold != 0 else self.default_threshold,
+            "chunk_text": self.chunk_text_threshold if self.chunk_text_threshold != 0 else self.default_threshold,
         }
 
     @validator('default_threshold', always=True)
