@@ -22,12 +22,15 @@ async def assistant_query(item: schema.AssistantQueryItem):
         4. 위 프로세스를 위한 spec이 조회되지 않는다면, RAG를 조회합니다.
         5. 최종 Response를 사용자에게 전달합니다.
     """
-    agent = create_assistant_agent(Settings(), item.thresholds, 
-        top_k=item.rag_top_k, max_tokens=item.max_tokens
-    )
-    
-    query = item.query
-    response = agent.invoke({"query":query})
+    try:
+        agent = create_assistant_agent(Settings(), item.thresholds, 
+            top_k=item.rag_top_k, max_tokens=item.max_tokens
+        )
+        
+        query = item.query
+        response = agent.invoke({"query":query})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail='Internal Server Error with : ' + str(e))
     
     if 'query_response' in response:
         return JSONResponse(content=response, status_code=200)
