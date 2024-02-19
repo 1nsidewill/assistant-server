@@ -1,12 +1,48 @@
+# Assistant-Server
 
+## 프로젝트 소개
 
+안녕하세요! `assistant-server` 리포지토리에 오신 걸 환영합니다. 이 프로젝트는 Python으로 작성되었고, FastAPI 프레임워크를 사용해 구축된 서버 애플리케이션입니다. 의존성 관리는 Poetry를 통해 이루어지죠. 핵심 기능은 LangChain을 활용해 사용자의 질문에 대한 답변을 제공하는 건데, 사용자의 입력을 바탕으로 API 호출을 할지, 벡터 데이터베이스에서 정보를 검색할지 결정합니다.
 
-Clean Cloning the Project:
+## 프로젝트 구조
 
-1. Clone with Project
-2. poetry install (if poetry is not installed, install it with pip or whatever)
-3. poetry shell (To activate virtual environment)
-4. F5 to start debugging (Default Port: 8005)
+이 코드베이스는 프로젝트 최상위에 위치한 `app` 디렉토리 내에 조직되어 있어요. 여기 안에는 몇 가지 주요 폴더와 파일이 있습니다:
+
+- **Assistant**: LangChain의 기능에 연결된 로직이 포함되어 있어요. 특히 `Agent` 기술을 사용해 정의된 로직에 따라 사용자 질문에 대한 응답을 생성합니다.
+- **CRUD**: Vectored, PostgreSQL 등의 데이터베이스와 상호 작용하는 기능(데이터 삽입, 삭제, 업데이트)이 정의된 폴더입니다.
+- **Routers**: FastAPI 애플리케이션의 엔드포인트를 정의합니다. `assistant_router.py`와 `crud_router.py` 같은 파일이 포함되어 있어, 서버 내 특정 경로와 작업을 처리해요.
+- **main.py**: FastAPI 앱의 진입점으로, 애플리케이션의 다른 부분에 대한 라우터를 포함합니다.
+
+또한, `app` 폴더 바깥, 루트 레벨에는 다음과 같은 것들이 있어요:
+
+- **Examples**: 테스트 코드와 사용 예제가 포함된 디렉토리입니다.
+- **Packages**: 의존성을 직접 설치하는 데 사용되는 `.whl` 파일이 포함된 폴더입니다.
+- **poetry.lock**과 **pyproject.toml**: 프로젝트 의존성과 설정을 관리하는 데 필수적인 파일들이죠.
+
+## 설치 및 설정
+
+프로젝트를 깨끗하게 클론하고 시작하기 위한 단계는 다음과 같습니다:
+
+1. **프로젝트 클론**: 로컬 기기에 리포지토리의 복사본을 가져옵니다.
+2. **의존성 설치**: `poetry install`을 실행합니다. 시스템에 Poetry가 설치되어 있지 않다면 pip 또는 다른 패키지 매니저를 사용해 설치할 수 있어요.
+3. **가상 환경 활성화**: `poetry shell`을 실행하여 프로젝트의 가상 환경에 진입합니다.
+4. **서버 시작**: F5를 눌러 디버깅을 시작합니다(기본 포트는 8005입니다).
+
+## 사용법
+
+`assistant-server`는 FastAPI 엔드포인트를 통해 사용자 질문을 처리하도록 설계되었습니다. LangChain과 통합하여 각 질문에 대해 최적의 행동 방침을 지능
+
+적으로 결정합니다.
+
+서버와 상호 작용하는 방법과 구체적인 사용 예제를 보려면 `Examples` 디렉토리를 참조하세요. 여기에는 자세한 지침과 코드 샘플이 포함되어 있습니다.
+
+## Contribution
+
+`assistant-server` 프로젝트에 기여하고 싶으신가요? 새로운 기능 추가, 버그 수정, 문서 개선 등 어떤 형태의 기여도 환영합니다! 이 프로젝트를 더 좋게 만들기 위한 여러분의 도움을 기다리고 있어요.
+
+---
+
+이 README는 프로젝트의 세부사항과 개인의 선호에 맞게 조정할 수 있도록 설계되었어요. 필요에 따라 내용을 조정하고 추가해주세요!
 
 
 
