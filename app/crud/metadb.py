@@ -57,24 +57,16 @@ class QueryMetaDB:
             res = [tuple(row.values()) for row in res]
  
         return res
-        
-    def get_system(self, id: str) -> tuple:
-        query = f"select connect_type, connect_spec from api_system where system_id = {id} and status = 'Y'"
-        result = self.run(query, "one")
-        if result:
-            connect_type, connect_spec = result[0]  # Unpack the first tuple
-                        
-            return (connect_type, connect_spec)
-        else: 
-            return None
-    
+            
     def get_api(self, id: str) -> tuple:
-        query = f"select system_id, api_spec from api_spec where api_id = {id} and status = 'Y'"
+        query = f"""select api_spec, connect_type, connect_spec 
+            from api_spec where api_id = {id} and status = 'Y'
+            """
         result = self.run(query, "one")
         if result:
-            system_id, api_spec = result[0]  # Unpack the first tuple
+            api_spec, connect_type, connect_spec = result[0]  # Unpack the first tuple
             # parsed_json = ast.literal_eval(api_spec)
-            return (system_id, api_spec)
+            return (api_spec, connect_type, connect_spec)
         else: 
             return None
     

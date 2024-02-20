@@ -84,12 +84,11 @@ class AssistantAgent(BaseSingleActionAgent):
                 docs: List[Document] = intermediate[-1]
                 if len(docs) > 0:
                     api_id = docs[0].metadata['api_id']
-                    (system_id, api_spec)= self.metadb.get_api(api_id)
-                    (connect_type, system_spec)= self.metadb.get_system(system_id)
+                    (api_spec, connect_type, connect_spec)= self.metadb.get_api(api_id)
                     
                     try:                                         
                         if connect_type == "REST":
-                            app_api_spec: dict = json.loads(system_spec)
+                            app_api_spec: dict = json.loads(connect_spec)
                             app_api_spec.update(dict(json.loads(api_spec)))
                             path = list(app_api_spec['paths'].keys())[0]
                             method = list(app_api_spec['paths'][path].keys())[0]
@@ -110,7 +109,7 @@ class AssistantAgent(BaseSingleActionAgent):
                         elif connect_type == "SQL":
                             response['stage'] = 'sql_call'
                             
-                            service: dict = json.loads(system_spec)
+                            service: dict = json.loads(connect_spec)
                             server = service['servers'][0]
                             from sqlalchemy import URL
                             url_object = URL.create(
