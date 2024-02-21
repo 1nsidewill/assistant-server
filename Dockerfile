@@ -4,6 +4,8 @@ WORKDIR /app
 ## Copy all src files
 COPY ./ .
 
+RUN mv .env-prd .env
+
 ## Install packages
 RUN apt-get update  && \
     apt-get install -y build-essential && \
