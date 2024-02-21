@@ -7,9 +7,9 @@ from app.exceptions import *
 # Import other exceptions and handlers as needed
 import uvicorn
 
-
+config = Settings()
 # Initiate app
-app = FastAPI(title=Settings().app_name)
+app = FastAPI(title=config.app_name)
 
 # Including Routers
 app.include_router(assistant_router, prefix="/assistant")
@@ -27,10 +27,10 @@ app.add_exception_handler(HTTPException, http_exception_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 모든 출처 허용
-    allow_credentials=True,
-    allow_methods=["*"],  # 모든 HTTP 메서드 허용
-    allow_headers=["*"],  # 모든 헤더 허용
+    allow_origins=config.allow_origins,
+    allow_credentials=config.allow_credentials,
+    allow_methods=config.allow_methods,
+    allow_headers=config.allow_headers,
 )
 
 if __name__ == "__main__":

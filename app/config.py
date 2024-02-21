@@ -5,6 +5,11 @@ class Settings(BaseSettings):
     # Name of this App
     app_name: str
     
+    allow_origins: list[str]
+    allow_credentials: bool
+    allow_methods: list[str]
+    allow_headers: list[str]
+    
     # Milvus Connection Info
     milvus_host: str
     milvus_port: int
