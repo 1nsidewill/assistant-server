@@ -50,42 +50,6 @@ def check_domain_in_pg():
     print("Check Domain in PG Start!!")
     metadb = QueryMetaDB()
     return metadb.get_domain_list()
-    #db connect
-    # pg_connection = psycopg2.connect(
-    #     host = postgre_HOST,
-    #     port = postgre_PORT,
-    #     database = postgre_DB,
-    #     user = postgre_USER,
-    #     password = postgre_PW
-    # )
-
-    # cursor = pg_connection.cursor()
-    # try:
-    #     #PGData Select
-    #     select_sql =  " SELECT DOMAIN_ID, DOMAIN_NAME, DOMAIN_DESC "        
-    #     select_sql += "   FROM DOMAIN "        
-    #     cursor.execute(select_sql)        
-    #     rows = cursor.fetchall()
-    #     #print(rows)
-
-    #     #get file info list
-    #     insert_domain_list = [] 
-    #     #print(rows)       
-    #     for row in rows:
-    #         domain_list = {}
-    #         domain_list['domain_id'] = row[0]
-    #         domain_list['domain_name'] = row[1]
-    #         domain_list['domain_desc'] = row[2]
-    #         insert_domain_list.append(domain_list)            
-        
-    #     #print(insert_file_list)
-    # except Exception as e:
-    #     print("Error : " + str(e))
-
-    # cursor.close()
-    # pg_connection.close()
-    # print("Check Domain in PG Finish!!")
-    # return insert_domain_list
 
 
 # ==================================================================
@@ -239,40 +203,31 @@ def recreate_milvus_collection(collection_name):
     elif collection_name == "api_desc":
         #collection schema   
         pk = FieldSchema(
-        name="pk",
-        #dtype=DataType.INT64,
-        dtype=DataType.VARCHAR,
-        max_length=512,
-        is_primary=True,    
-        #auto_id=True,
+            name="pk",
+            #dtype=DataType.INT64,
+            dtype=DataType.VARCHAR,
+            max_length=512,
+            is_primary=True,    
+            #auto_id=True,
         ) 
         vector = FieldSchema(
-        name="vector",
-        dtype=DataType.FLOAT_VECTOR,
-        dim=1024,
+            name="vector",
+            dtype=DataType.FLOAT_VECTOR,
+            dim=1024,
         )
         api_id = FieldSchema(
-        name="api_id",
-        dtype=DataType.INT64,
+            name="api_id",
+            dtype=DataType.INT64,
         )
         text = FieldSchema(
-        name="text",
-        dtype=DataType.VARCHAR,
-        max_length=2048,
+            name="text",
+            dtype=DataType.VARCHAR,
+            max_length=2048,
         )
         domain_id = FieldSchema(
-        name="domain_id",
-        dtype=DataType.INT64
+            name="domain_id",
+            dtype=DataType.INT64
         )
-        # spec = FieldSchema(
-        # name="spec",
-        # dtype=DataType.VARCHAR,
-        # max_length=4096,
-        # )
-        # system_id = FieldSchema(
-        # name="system_id",
-        # dtype=DataType.INT64,
-        # )
         
         schema = CollectionSchema(
             fields=[pk, vector, api_id, text, domain_id],

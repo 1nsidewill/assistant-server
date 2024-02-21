@@ -154,8 +154,7 @@ class AssistantAgent(BaseSingleActionAgent):
 
     
     async def _anext(self, observation: Dict[str, Any], config: Dict[str, Any]) -> Union[AgentAction, AgentFinish]:
-            """Parse text into agent action/finish."""
-            return AgentFinish({}, "self._outputs[-1]")
+            return self._next(observation, config)
 
     class Config:
         """Configuration for this pydantic object."""
