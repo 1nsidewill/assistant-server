@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 # from starlette.middleware.sessions import SessionMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 from app.config import Settings
 from app.routers import assistant_router, crud_router
 from app.exceptions import *
@@ -24,6 +25,13 @@ app.add_exception_handler(ValidationErrorException, validation_error_exception_h
 
 app.add_exception_handler(HTTPException, http_exception_handler)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 모든 출처 허용
+    allow_credentials=True,
+    allow_methods=["*"],  # 모든 HTTP 메서드 허용
+    allow_headers=["*"],  # 모든 헤더 허용
+)
 
 if __name__ == "__main__":
     import uvicorn
