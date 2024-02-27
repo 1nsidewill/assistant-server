@@ -17,7 +17,7 @@ langchain_community = { path = "packages/langchain_community-0.0.17-py3-none-any
 langchain = { path = "packages/langchain-0.1.5-py3-none-any.whl" }
 pydantic = ">=2"
 pydantic-settings = ">=2"
-pymilvus = ">=2"
+pymilvus = ">=2.3.6"
 redis = ">=4"
 psycopg2-binary = ">=2"
 langserve = ">=0.0.38"
