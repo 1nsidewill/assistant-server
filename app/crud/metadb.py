@@ -15,10 +15,12 @@ def truncate_word(content: Any, *, length: int, suffix: str = "...") -> str:
  
 class QueryMetaDB:
  
-    db: SQLDatabase = None
- 
-    def __init__(self):
-        if self.__class__.db is None:
+    _db: SQLDatabase = None
+    
+
+    @property
+    def db(self) -> SQLDatabase:
+        if self.__class__._db is None:
             from app.config import get_settings
             conf = get_settings()
             url_object = URL.create(
@@ -29,11 +31,8 @@ class QueryMetaDB:
                 port=conf.metadb_PORT,
                 database=conf.metadb_DB,
             )
-            self.__class__.db = SQLDatabase.from_uri(database_uri=url_object)
-
-    @property
-    def db(self) -> SQLDatabase:
-        return self.__class__.db
+            self.__class__._db = SQLDatabase.from_uri(database_uri=url_object)
+        return self.__class__._db
     
     def run(
         self,
