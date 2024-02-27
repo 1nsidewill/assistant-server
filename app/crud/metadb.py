@@ -31,6 +31,10 @@ class QueryMetaDB:
             )
             self.__class__.db = SQLDatabase.from_uri(database_uri=url_object)
 
+    @property
+    def db(self) -> SQLDatabase:
+        return self.__class__.db
+    
     def run(
         self,
         command: str,
