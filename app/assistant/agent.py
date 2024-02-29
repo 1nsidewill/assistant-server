@@ -132,7 +132,7 @@ class AssistantAgent(BaseSingleActionAgent):
                                 spec=api_spec,
                                 datadb=self.datadb,
                             )
-                            # ToDo : SQL Call
+                        
                             self._response['query_response'] = result
                             
                             return AgentFinish(return_values=self._response, log="agent end with sql_call")

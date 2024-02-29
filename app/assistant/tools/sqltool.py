@@ -5,6 +5,7 @@ from langchain_core.tools import (Tool)
 from langchain.chains import (LLMChain)
 from langchain_core.prompts import (PromptTemplate)
 from langchain_community.utilities.sql_database import (SQLDatabase)
+from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
 
 sql_template= """You are a helpful AI Assistant. Please provided SQL statement from json args based on the user's instructions.
 
@@ -35,12 +36,18 @@ Begin
 SQL_STATEMENT:
 """
 
-class SQLCallTool(Tool):
+class SQLCallTool():
     """SQL Call Tool."""
 
-    datadb: SQLDatabase
-    chain: LLMChain
+    def __init__(self, tool, sql_input):
+        self.tool = tool  # Assuming 'tool' is an instance of another class or data structure
+        self.sql_input = sql_input  # Assuming 'sql_input' is the output of LLMChain or similar
+    # Example method to demonstrate usage
+    def run(self):
+        result = self.tool.run(self.sql_input['text'])
 
+        return result
+        
     def _run(
         self,
         *args: Any,
@@ -74,7 +81,16 @@ class SQLCallTool(Tool):
                 raise ValueError("'data_uri' must be provided in .env.")
             datadb = SQLDatabase.from_uri(conf.data_uri)
 
+        toolkit= SQLDatabaseToolkit(llm=llm, db=datadb)
+        tools = toolkit.get_tools()
+        tool_names = [tool.name for tool in tools]
+        tool = tools[tool_names.index("sql_db_query")]
+        
+        sql_input = chain.invoke(input={"schema":spec, 
+            "args":{"id":"1"}})
+            
         return cls(
-            datadb=datadb,
-            chain=chain,
+            tool=tool,
+            sql_input=sql_input,
         )
+        
