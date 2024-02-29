@@ -127,7 +127,7 @@ class AssistantAgent(BaseSingleActionAgent):
                                 datadb=self.datadb,
                             )
                         
-                            response['query_response'] = result
+                            response['query_response'] = sql.run()
                             
                             return AgentFinish(return_values=response, log="agent end with sql_call")
                     except Exception as e:
