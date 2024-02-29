@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # Redis
     redis_url: str
 
-    metadb_uri: str
+    # metadb_uri: str
     
     #Hyper Clover X connect info    
     hcx_mode: str
@@ -61,6 +61,7 @@ class Settings(BaseSettings):
     chunk_overlap: int
 
     _callback: any = None
+    _sessionlog: any = None
         
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding='utf-8')
     

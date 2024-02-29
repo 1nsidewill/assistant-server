@@ -23,41 +23,14 @@ from langchain_community.utilities.sql_database import (SQLDatabase)
 from app.assistant.agent import AssistantAgent
 from app.assistant.tools.openapitool import OpenAPITool
 from app.assistant.tools.document_retriever_tool import create_retriever_tool as document_retriever_tool
+from app.assistant.sessionlog import RedisSessionLog
 
 from app.config import Settings
 
-def get_memory(session_id: str, config: Settings):
-    message_history = RedisChatMessageHistory(
-        url=config.redis_url, 
-        ttl=600,
-        session_id=session_id,
-    )
-    memory = ConversationBufferMemory(
-        memory_key="chat_history", chat_memory=message_history
-    )
-
-    return memory
-
-_ROLE_MAP = {"human": "Human: ", "ai": "Assistant: "}
-CHAT_TURN_TYPE = Union[str, Tuple[str, str], BaseMessage]
-def _get_chat_history(chat_history: List[CHAT_TURN_TYPE]) -> str:
-    buffer = ""
-    for dialogue_turn in chat_history:
-        if isinstance(dialogue_turn, str):
-            buffer += "\n" + dialogue_turn
-        elif isinstance(dialogue_turn, BaseMessage):
-            role_prefix = _ROLE_MAP.get(dialogue_turn.type, f"{dialogue_turn.type}: ")
-            buffer += f"\n{role_prefix}{dialogue_turn.content}"
-        elif isinstance(dialogue_turn, tuple):
-            human = "Human: " + dialogue_turn[0]
-            ai = "Assistant: " + dialogue_turn[1]
-            buffer += "\n" + "\n".join([human, ai])
-        else:
-            raise ValueError(
-                f"Unsupported chat history format: {type(dialogue_turn)}."
-                f" Full chat history: {chat_history} "
-            )
-    return buffer
+def get_session_log(config: Settings):
+    if config._sessionlog == None:
+        config._sessionlog = RedisSessionLog(config.redis_url)
+    return config._sessionlog
 
 def get_callback(config: Settings):
     if config._callback == None:
@@ -129,8 +102,9 @@ def create_assistant_agent(
     llm = get_chatllm(config)
 
     callbacks = [get_callback(config)]
+    sessionlog = get_session_log(config)
 
-    requests_wrapper = RequestsWrapper()
+    # requests_wrapper = RequestsWrapper()
     embeddings = get_embeddings(config, max_tokens)
     datadb = SQLDatabase.from_uri(database_uri=config.data_uri)
     tools = [
@@ -144,6 +118,7 @@ def create_assistant_agent(
         tools=tools,
         datadb=datadb,
         callbacks=callbacks,
+        sessionlog=sessionlog,
         kwargs=kwargs,
     )
     return AgentExecutor.from_agent_and_tools(

@@ -1,25 +1,26 @@
 from typing import (Any, Dict, Iterator, List, Optional, Sequence, Tuple, Union,)
 import json
 
-from langchain_core.agents import (AgentAction, AgentFinish, AgentStep)
+from langchain_core.agents import (AgentAction, AgentFinish) #, AgentStep)
 from langchain_core.callbacks import (BaseCallbackHandler)
 from langchain_core.documents import (Document)
 from langchain_core.language_models import (BaseLanguageModel)
-from langchain_core.embeddings import (Embeddings)
-from langchain_core.prompts import (ChatPromptTemplate, PromptTemplate)
-from langchain_core.vectorstores import (VectorStore)
+# from langchain_core.embeddings import (Embeddings)
+# from langchain_core.prompts import (ChatPromptTemplate, PromptTemplate)
+# from langchain_core.vectorstores import (VectorStore)
 from langchain_core.tools import (BaseTool)
 from langchain_core.output_parsers import (StrOutputParser)
 from langchain_community.utilities.sql_database import (SQLDatabase)
 
-from langchain.agents.agent import (BaseSingleActionAgent, AgentExecutor)
-from langchain.chains import (LLMChain)
+from langchain.agents.agent import (BaseSingleActionAgent) #, AgentExecutor)
+# from langchain.chains import (LLMChain)
 from langchain.agents.utils import (validate_tools_single_input)
 from langchain.callbacks.manager import (Callbacks)
 from app.crud.metadb import QueryMetaDB
 from app.assistant.tools.openapitool import (OpenAPITool, OpenAPISpec)
 from app.assistant.tools.sqltool import SQLCallTool
 from app.assistant.templates import AgentTemplates
+from app.assistant.sessionlog import RedisSessionLog
 
 class AssistantAgent(BaseSingleActionAgent):
     """Agent powered by didm365."""
@@ -33,6 +34,8 @@ class AssistantAgent(BaseSingleActionAgent):
     """tools"""
     callbacks: Optional[List[BaseCallbackHandler]] = None
     """callbacks"""
+    sessionlog: Optional[RedisSessionLog] = None
+    """sessionlog"""
     _input_keys: List[str] = []
     """Input keys."""
     _outputs: List[Dict[str, Any]] = []
@@ -40,7 +43,8 @@ class AssistantAgent(BaseSingleActionAgent):
     _metadb: Optional[QueryMetaDB] = None
     # _metadb_uri: Optional[str] = None
     """query Database"""
-
+    _response: dict[str, Any] = {}
+    
     def dict(self, **kwargs: Any) -> Dict:
         """Return dictionary representation of agent."""
         _dict = super().dict()
@@ -57,33 +61,35 @@ class AssistantAgent(BaseSingleActionAgent):
         return self.allowed_tools
     
     def _next(self, observation: Dict[str, Any], config: Dict[str, Any]) -> Union[AgentAction, AgentFinish]:
-        response = {}
         query = observation['query']
-        response['query'] = query
         
         """Parse text into agent action/finish."""
         intermediate_steps = observation.pop("intermediate_steps", None)
         if len(intermediate_steps) == 0:
             # 1. 처음 들어올 때
+            self._response.update({"query": query, "stage": "start"})
             return AgentAction(tool="domain_desc", tool_input=query, log="find domain from vectorstore(domain_desc)", kwargs=config)
         else:
             intermediate = intermediate_steps[-1]
             agent_action:AgentAction  = intermediate[0]
             # 2. domain 조회 후
             if agent_action.tool == "domain_desc":
-                response['stage'] = 'check_domain'
+                self._response['stage'] = 'check_domain'
                 docs: List[Document] = intermediate[-1]
                 if len(docs) > 0:
-                    observation.update({"domain": docs[0].page_content})
+                    domain_id = docs[0].metadata['domain_id']
+                    observation.update({"domain_id": domain_id})
+                    self._response['domain_id'] = domain_id
                     return AgentAction(tool="api_desc", tool_input=observation, log="find api from vectorstore(api_spec)", kwargs=config)
                 else:
-                    return AgentFinish(return_values=response, log="cant find domain from vectorstore(domain_desc)")
+                    return AgentFinish(return_values=self._response, log="cant find domain from vectorstore(domain_desc)")
             # 3. api_spec 조회 후
             elif agent_action.tool == "api_desc":
-                response['stage'] = 'check_api'
+                self._response['stage'] = 'check_api'
                 docs: List[Document] = intermediate[-1]
                 if len(docs) > 0:
                     api_id = docs[0].metadata['api_id']
+                    self._response['api_id'] = api_id
                     (api_spec, connect_type, connect_spec)= self.metadb.get_api(api_id)
                     
                     try:                                         
@@ -93,7 +99,7 @@ class AssistantAgent(BaseSingleActionAgent):
                             path = list(app_api_spec['paths'].keys())[0]
                             method = list(app_api_spec['paths'][path].keys())[0]
 
-                            response['stage'] = 'api_call'
+                            self._response['stage'] = 'api_call'
                             
                             api_tool = OpenAPITool.from_llm_and_method(
                                 llm=self.llm,
@@ -103,11 +109,11 @@ class AssistantAgent(BaseSingleActionAgent):
                             )
                             
                             result = api_tool.run(observation)
-                            response['query_response'] = result
+                            self._response['query_response'] = result
                             
-                            return AgentFinish(return_values=response, log="agent end with api_call")
+                            return AgentFinish(return_values=self._response, log="agent end with api_call")
                         elif connect_type == "SQL":
-                            response['stage'] = 'sql_call'
+                            self._response['stage'] = 'sql_call'
                             
                             service: dict = json.loads(connect_spec)
                             server = service['servers'][0]
@@ -126,35 +132,36 @@ class AssistantAgent(BaseSingleActionAgent):
                                 spec=api_spec,
                                 datadb=self.datadb,
                             )
-                        
-                            response['query_response'] = result
+                            # ToDo : SQL Call
+                            self._response['query_response'] = result
                             
-                            return AgentFinish(return_values=response, log="agent end with sql_call")
+                            return AgentFinish(return_values=self._response, log="agent end with sql_call")
                     except Exception as e:
                         return AgentAction(tool="chunk_text", tool_input=observation, log="error handling api call : " + str(e) + " so instead find docs text from vectorstore(chunk_text)", kwargs=config)
                 else:
                     return AgentAction(tool="chunk_text", tool_input=observation, log="find docs text from vectorstore(chunk_text)", kwargs=config)
             # 5. docs text 조회 후
             elif agent_action.tool == "chunk_text":
-                response['stage'] = 'RAG'
+                self._response['stage'] = 'RAG'
                 docs: List[Document] = intermediate[-1]
                 if len(docs) > 0:
                     atmp = AgentTemplates('rag')
                     context = atmp.get_context_with_documents(docs)
+                    self._response['file_ids'] = atmp.get_files_with_documents(docs)
+                    self._response['chunk_ids'] = atmp.get_chunks_with_documents(docs)
                     prompt = atmp.get_prompt()
-                    chain = prompt | self.llm | StrOutputParser()
-                    
-                    result = chain.invoke({"context":context, "question": query})
-                    response['query_response'] = result
-                    response['used_context'] = context
-                    
-                    return AgentFinish(return_values=response, log="agent end with docs text")
-                else:
-                    return AgentFinish(return_values=response, log="cant find data from vectorstore(api_desc or chunk_text)")
 
+                    chain = prompt | self.llm | StrOutputParser()
+                    result = chain.invoke({"context":context, "question": query})
+                    self._response['query_response'] = result
+
+                    
+                    return AgentFinish(return_values=self._response, log="agent end with docs text")
+                else:
+                    return AgentFinish(return_values=self._response, log="cant find data from vectorstore(api_desc or chunk_text)")
     
     async def _anext(self, observation: Dict[str, Any], config: Dict[str, Any]) -> Union[AgentAction, AgentFinish]:
-            return self._next(observation, config)
+        return self._next(observation, config)
 
     class Config:
         """Configuration for this pydantic object."""
@@ -185,6 +192,7 @@ class AssistantAgent(BaseSingleActionAgent):
         llm: BaseLanguageModel,
         tools: Sequence[BaseTool],
         callbacks: Optional[List[BaseCallbackHandler]] = None,
+        sessionlog: Optional[RedisSessionLog] = None,
         **kwargs: Any,
     ) -> BaseSingleActionAgent:
         cls._validate_tools(tools)
@@ -193,6 +201,7 @@ class AssistantAgent(BaseSingleActionAgent):
             tools=tools,
             allowed_tools=[tool.name for tool in tools],
             callbacks=callbacks,
+            sessionlog=sessionlog,
             **kwargs,
         )
 

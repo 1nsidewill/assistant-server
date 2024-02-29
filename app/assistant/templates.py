@@ -1,6 +1,7 @@
 from langchain_core.prompts import (PromptTemplate, ChatPromptTemplate)
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+from langchain_core.documents import (Document)
+# from langchain_core.output_parsers import StrOutputParser
+# from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 
 class AgentTemplates():
     def __init__(self, template_type):
@@ -63,3 +64,16 @@ class AgentTemplates():
             
         return context
         
+    def get_files_with_documents(self, documents: list[Document]):
+        files = []
+        for document in documents:
+            files.append(document.metadata['file_id'])
+            
+        return files
+    
+    def get_chunks_with_documents(self, documents: list[Document]):
+        chunks = []
+        for document in documents:
+            chunks.append(document.metadata['chunk_index'])
+            
+        return chunks

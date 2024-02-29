@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.assistant import create_assistant_agent
+from app.assistant import (create_assistant_agent, AgentExecutor)
 from app.config import Settings
 from app import schema
 from app.exceptions import *
@@ -7,7 +7,7 @@ from app.exceptions import *
 router = APIRouter()
 
 @router.post("/assistant_query")
-async def assistant_query(item: schema.AssistantQueryItem):
+async def assistant_query(request: Request ,item: schema.AssistantQueryItem):
     """
         1. Executing API
         query : didim365.cc 등록 가능한 도메인을 알려 줘
@@ -23,12 +23,18 @@ async def assistant_query(item: schema.AssistantQueryItem):
         5. 최종 Response를 사용자에게 전달합니다.
     """
     try:
-        agent = create_assistant_agent(Settings(), item.thresholds, 
-            top_k=item.rag_top_k, max_tokens=item.max_tokens
+        executer: AgentExecutor = create_assistant_agent(
+            Settings(), 
+            item.thresholds, 
+            top_k=item.rag_top_k, 
+            max_tokens=item.max_tokens,
         )
         
         query = item.query
-        response = agent.invoke({"query":query})
+        response = executer.invoke({"query":query})
+
+        executer.agent.sessionlog.add_message(request.cookies['sessionid'], response)
+
     except Exception as e:
         raise HTTPException(status_code=500, detail='Internal Server Error with : ' + str(e))
     
