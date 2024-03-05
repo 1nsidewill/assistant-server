@@ -8,6 +8,11 @@ router = APIRouter()
 
 @router.post("/assistant_query")
 async def assistant_query(request: Request ,item: schema.AssistantQueryItem):
+    print(request.headers)
+    # To print headers in a more readable format
+    for header, value in request.headers.items():
+        print(f"{header}: {value}")
+        
     """
         1. Executing API
         query : didim365.cc 등록 가능한 도메인을 알려 줘
