@@ -53,7 +53,10 @@ async def assistant_query(request: Request ,item: schema.AssistantQueryItem):
         query = item.query
         # Apply timeout to the invoke operation
         response = await invoke_with_timeout(executer, {"query": query})
-        executer.agent.sessionlog.add_message(request.cookies['sessionid'], response)
+        
+        sessionid = request.cookies['sessionid']
+        print("Session Id : " + sessionid)
+        executer.agent.sessionlog.add_message(sessionid, response)
 
     except Exception as e:
         if hasattr(e, 'args') and e.args:
