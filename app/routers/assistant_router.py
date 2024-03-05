@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post("/assistant_query")
 async def assistant_query(request: Request ,item: schema.AssistantQueryItem):
+    print(request)
     print(request.headers)
     # To print headers in a more readable format
     for header, value in request.headers.items():
