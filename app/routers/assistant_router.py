@@ -59,6 +59,7 @@ async def assistant_query(request: Request ,item: schema.AssistantQueryItem):
         executer.agent.sessionlog.add_message(sessionid, response)
 
     except Exception as e:
+        print("Error Logging : " + e)
         if hasattr(e, 'args') and e.args:
             detail_message = 'Internal Server Error with details: ' + '; '.join(e.args)
         else:
