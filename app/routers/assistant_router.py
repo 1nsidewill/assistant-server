@@ -3,9 +3,23 @@ from app.assistant import (create_assistant_agent, AgentExecutor)
 from app.config import Settings
 from app import schema
 from app.exceptions import *
+import asyncio
+from starlette.concurrency import run_in_threadpool
 
 router = APIRouter()
 
+async def invoke_with_timeout(executer, query, timeout=10):
+    try:
+        # Use asyncio.wait_for to enforce a timeout
+        response = await asyncio.wait_for(
+            run_in_threadpool(executer.invoke, query),
+            timeout=timeout
+        )
+        return response
+    except asyncio.TimeoutError:
+        # Handle timeout, e.g., by logging, cleaning up, or setting a default response
+        raise HTTPException(status_code=408, detail="Operation timed out")
+    
 @router.post("/assistant_query")
 async def assistant_query(request: Request ,item: schema.AssistantQueryItem):
     print(request)
@@ -29,7 +43,7 @@ async def assistant_query(request: Request ,item: schema.AssistantQueryItem):
         5. 최종 Response를 사용자에게 전달합니다.
     """
     try:
-        executer: AgentExecutor = create_assistant_agent(
+        executer: AgentExecutor = await create_assistant_agent(
             Settings(), 
             item.thresholds, 
             top_k=item.rag_top_k, 
@@ -37,8 +51,8 @@ async def assistant_query(request: Request ,item: schema.AssistantQueryItem):
         )
         
         query = item.query
-        response = executer.invoke({"query":query})
-
+        # Apply timeout to the invoke operation
+        response = await invoke_with_timeout(executer, {"query": query})
         executer.agent.sessionlog.add_message(request.cookies['sessionid'], response)
 
     except Exception as e:

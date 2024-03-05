@@ -91,7 +91,7 @@ def get_embeddings(config: Settings, max_tokens: int):
     
     
 
-def create_assistant_agent(
+async def create_assistant_agent(
     config: Settings,
     thresholds: dict[str, float | None],
     top_k: int = 1,
