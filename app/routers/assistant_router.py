@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 
 router = APIRouter()
 
-async def invoke_with_timeout(executer, query, timeout=10):
+async def invoke_with_timeout(executer, query, timeout=20):
     try:
         # Use asyncio.wait_for to enforce a timeout
         response = await asyncio.wait_for(
@@ -59,7 +59,7 @@ async def assistant_query(request: Request ,item: schema.AssistantQueryItem):
         executer.agent.sessionlog.add_message(sessionid, response)
 
     except Exception as e:
-        print("Error Logging : " + e)
+        print("Error Logging : " + str(e))
         if hasattr(e, 'args') and e.args:
             detail_message = 'Internal Server Error with details: ' + '; '.join(e.args)
         else:
