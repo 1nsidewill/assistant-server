@@ -36,7 +36,11 @@ async def assistant_query(request: Request ,item: schema.AssistantQueryItem):
         executer.agent.sessionlog.add_message(request.cookies['sessionid'], response)
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail='Internal Server Error with : ' + str(e))
+        if hasattr(e, 'args') and e.args:
+            detail_message = 'Internal Server Error with details: ' + '; '.join(e.args)
+        else:
+            detail_message = 'Internal Server Error with unspecified exception'
+        raise HTTPException(status_code=500, detail='Internal Server Error with : ' + detail_message) from e
     
     if 'query_response' in response:
         return JSONResponse(content=response, status_code=200)
