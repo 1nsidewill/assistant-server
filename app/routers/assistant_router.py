@@ -28,7 +28,7 @@ async def assistant_query(request: Request, item: schema.AssistantQueryItem):
         
     try:
         executer: AgentExecutor = await create_assistant_agent(
-            Settings(), 
+            Settings(),
             item.thresholds, 
             top_k=item.rag_top_k, 
             max_tokens=item.max_tokens,
