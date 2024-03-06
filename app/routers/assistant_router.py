@@ -20,8 +20,9 @@ async def invoke_with_timeout(executer, query, timeout=20):
 
 @router.post("/assistant_query")
 async def assistant_query(request: Request, item: schema.AssistantQueryItem):
-    print(request)
-    print(request.headers)
+    query = item.query
+    print("Querying Assistant with user input : ") + query
+    print("Headers Info :")
     for header, value in request.headers.items():
         print(f"{header}: {value}")
         
@@ -33,7 +34,6 @@ async def assistant_query(request: Request, item: schema.AssistantQueryItem):
             max_tokens=item.max_tokens,
         )
         
-        query = item.query
         response = await invoke_with_timeout(executer, {"query": query})
 
         if response is None:
