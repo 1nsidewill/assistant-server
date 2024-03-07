@@ -69,9 +69,9 @@ async def insert_test_data(item: schema.ApiDescItem):
     """
     {
         "collection_name": "api_desc",
-        "text": "네임서버에 등록 가능한 도메인인지 확인해 볼 수 있는 API입니다",
-        "api_id": 1,
-        "domain_id": 8
+        "text": "사원의 연차 (휴가) 상세 정보를 확인 할 수 있다. 날짜를 입력받는다",
+        "api_id": 4,
+        "domain_id": 9
     }
     """
     #connect milvus

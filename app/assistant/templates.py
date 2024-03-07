@@ -77,3 +77,10 @@ class AgentTemplates():
             chunks.append(document.metadata['chunk_index'])
             
         return chunks
+    
+    def get_scores_with_documents(self, documents: list[Document]):
+        scores = []
+        for document in documents:
+            scores.append(document.metadata['score'])
+            
+        return scores

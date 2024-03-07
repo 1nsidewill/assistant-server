@@ -89,7 +89,9 @@ class AssistantAgent(BaseSingleActionAgent):
                 docs: List[Document] = intermediate[-1]
                 if len(docs) > 0:
                     api_id = docs[0].metadata['api_id']
+                    score = docs[0].metadata['score']
                     self._response['api_id'] = api_id
+                    self._response['score'] = score
                     (api_spec, connect_type, connect_spec)= self.metadb.get_api(api_id)
                     
                     try:                                         
@@ -149,6 +151,7 @@ class AssistantAgent(BaseSingleActionAgent):
                     context = atmp.get_context_with_documents(docs)
                     self._response['file_ids'] = atmp.get_files_with_documents(docs)
                     self._response['chunk_ids'] = atmp.get_chunks_with_documents(docs)
+                    self._response['scores'] = atmp.get_scores_with_documents(docs)
                     prompt = atmp.get_prompt()
 
                     chain = prompt | self.llm | StrOutputParser()
