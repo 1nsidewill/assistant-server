@@ -23,7 +23,7 @@ async def assistant_query(request: Request, item: schema.AssistantQueryItem):
     query = item.query
     
     if item.aadObjectId:
-        query += " aadObjectId : " + item.aadObjectId
+        query += (" aadObjectId : " + item.aadObjectId)
         
     print("Querying Assistant with user input : " + query) 
     print("Headers Info :")
@@ -39,7 +39,8 @@ async def assistant_query(request: Request, item: schema.AssistantQueryItem):
         )
         
         response = await invoke_with_timeout(executer, {"query": query})
-
+        print(response)
+        
         if response is None:
             return JSONResponse(content={"detail": "Operation timed out"}, status_code=408)
         
