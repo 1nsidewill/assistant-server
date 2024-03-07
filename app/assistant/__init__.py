@@ -71,12 +71,13 @@ def get_retriever_tool(embeddings: Embeddings, collection_name: str,
 def get_sql(database_uri: str):
     return SQLDatabase.from_uri(database_uri=database_uri, engine_args={"echo":False})
 
-def get_chatllm(config: Settings):
+def get_chatllm(config: Settings, max_tokens: int):
     return ChatHCX(
         api_base=config.hcx_api_base, 
         clovastudio_api_key=config.hcx_clovastudio_api_key,
         apigw_api_key=config.hcx_apigw_api_key,
         callbacks=[get_callback(config)],
+        max_tokens=max_tokens
     )
     
 def get_embeddings(config: Settings, max_tokens: int):
@@ -99,7 +100,7 @@ async def create_assistant_agent(
     verbose: bool = False,
     **kwargs: Any,
 ) -> AgentExecutor:
-    llm = get_chatllm(config)
+    llm = get_chatllm(config, max_tokens)
 
     callbacks = [get_callback(config)]
     sessionlog = get_session_log(config)
