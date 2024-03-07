@@ -11,10 +11,6 @@ packages = [{include = "app"}]
 python = "^3.8.1"
 fastapi = ">=0.96.0"
 uvicorn = {extras = ["standard"], version = "^0.22.0"}
-hcxai = { path = "packages/hcxai-1.0.0-py3-none-any.whl" }
-langchain_core = { path = "packages/langchain_core-0.1.18-py3-none-any.whl" }
-langchain_community = { path = "packages/langchain_community-0.0.17-py3-none-any.whl" }
-langchain = { path = "packages/langchain-0.1.5-py3-none-any.whl" }
 pydantic = ">=2"
 pydantic-settings = ">=2"
 pymilvus = ">=2.3.6"
@@ -25,6 +21,10 @@ opentelemetry-api = ">=1"
 opentelemetry-sdk = ">=1"
 opentelemetry-exporter-otlp = ">=1"
 openapi-pydantic = ">=0.4"
+hcxai = {path = "packages/hcxai-1.0.0-py3-none-any.whl"}
+langchain-core = {path = "packages/langchain_core-0.1.18-py3-none-any.whl"}
+langchain-community = {path = "packages/langchain_community-0.0.17-py3-none-any.whl"}
+langchain = {path = "packages/langchain-0.1.5-py3-none-any.whl"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"

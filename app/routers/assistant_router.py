@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 
 router = APIRouter()
 
-async def invoke_with_timeout(executer, query, timeout=20):
+async def invoke_with_timeout(executer, query, timeout=30):
     try:
         response = await asyncio.wait_for(
             run_in_threadpool(executer.invoke, query),
