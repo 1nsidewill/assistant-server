@@ -21,6 +21,10 @@ async def invoke_with_timeout(executer, query, timeout=30):
 @router.post("/assistant_query")
 async def assistant_query(request: Request, item: schema.AssistantQueryItem):
     query = item.query
+    
+    if item.aadObjectId:
+        query += " aadObjectId : " + item.aadObjectId
+        
     print("Querying Assistant with user input : " + query) 
     print("Headers Info :")
     for header, value in request.headers.items():
