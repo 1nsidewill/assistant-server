@@ -1001,7 +1001,7 @@ description = "Building applications with LLMs through composability"
 optional = false
 python-versions = ">=3.8.1,<4.0"
 files = [
-    {file = "langchain-0.1.5-py3-none-any.whl", hash = "sha256:c7c67b2236fdf3a3e92e5de593731acf87680fabde145341cb2e281e8e26d80e"},
+    {file = "langchain-0.1.5-py3-none-any.whl", hash = "sha256:8f15ab04e97cee5685e5c21eaa20a8b8fc1cafe72a41fecf4ab7a235bd132853"},
 ]
 
 [package.dependencies]

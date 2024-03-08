@@ -111,7 +111,7 @@ async def create_assistant_agent(
     tools = [
         QuerySQLDataBaseTool(db=datadb),
         get_retriever_tool(embeddings, "domain_desc", config, thresholds["domain_desc"], top_k=1),
-        get_retriever_tool(embeddings, "api_desc", config, thresholds["api_desc"], "domain_id", top_k=2),
+        get_retriever_tool(embeddings, "api_desc", config, thresholds["api_desc"], "domain_id", top_k=3),
         get_retriever_tool(embeddings, "chunk_text", config, thresholds["chunk_text"], top_k=top_k),
     ]
     agent = AssistantAgent.from_llm_and_tools(

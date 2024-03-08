@@ -92,6 +92,11 @@ class AssistantAgent(BaseSingleActionAgent):
                     score = docs[0].metadata['score']
                     self._response['api_id'] = api_id
                     self._response['score'] = score
+                    
+                    print("Executed API Calls are : ")
+                    for doc in docs:
+                        print("API ID with Score : " + str(doc.metadata['api_id']) + ", "+ str(doc.metadata['score']))
+                        
                     (api_spec, connect_type, connect_spec)= self.metadb.get_api(api_id)
                     
                     try:                                         
