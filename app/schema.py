@@ -42,3 +42,9 @@ class ApiDescItem(BaseModel):
     text: str
     api_id: int
     domain_id: int
+
+class DomainDescItem(BaseModel):
+    collection_name: str
+    text: str
+    domain_id: int
+    name: str

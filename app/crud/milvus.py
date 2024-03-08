@@ -255,10 +255,28 @@ def recreate_milvus_collection(collection_name):
         print("File Input Collection Create Finish!!")        
 
 
-def insert_test_data(item:schema.ApiDescItem):
+def insert_test_data_into_api(item:schema.ApiDescItem):
     documents = []
     document = Document(page_content=item.text, metadata={"source":"database", "domain_id":item.domain_id, "api_id":item.api_id, "text":item.text})
         #print(document)
     documents.append(document)
     
     return documents
+
+def insert_test_data_into_domain(item:schema.DomainDescItem):
+    documents = []
+    document = Document(page_content=item.text, metadata={"source":"database", "domain_id":item.domain_id, "name":item.name, "text":item.text})
+        #print(document)
+    documents.append(document)
+    
+    return documents
+
+# Milvus 모듈에 `delete_from_milvus` 함수의 예시 구현은 다음과 같을 수 있습니다.
+# 이 부분은 Milvus 공식 문서나 SDK에 따라 달라질 수 있으며, 여기에 제공된 것은 예시일 뿐입니다.
+def delete_from_milvus(vector_db, api_id):
+    print("Insert Data into Milvus Start!!")
+        # Search pks (primary keys) using expression
+    expr = "api_id in " + str([api_id])
+    # pks = vector_db.get_pks(expr)    
+    vector_db.delete([str(api_id)])
+    print("Delete Data From Milvus Finish!!")

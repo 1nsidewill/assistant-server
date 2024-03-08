@@ -63,8 +63,8 @@ async def recreate_collection(collection_name):
     except Exception as e:
         raise HTTPException(500)
     
-@router.post("/insert_test_data")
-async def insert_test_data(item: schema.ApiDescItem):
+@router.post("/insert_test_data_into_api")
+async def insert_test_data_into_api_desc(item: schema.ApiDescItem):
     # test
     """
     {
@@ -77,9 +77,49 @@ async def insert_test_data(item: schema.ApiDescItem):
     #connect milvus
     try:
         vector_db = milvus.connect_milvus(item.collection_name)
-        documents = milvus.insert_test_data(item)
+        documents = milvus.insert_test_data_into_api(item)
         ids = milvus.create_ids(documents, "api_id")
         milvus.insert_milvus(vector_db, documents, ids)
         print('Done')
     except Exception as e:
         raise HTTPException(500)
+    
+@router.post("/insert_test_data_into_domain")
+async def insert_test_data_into_domain_desc(item: schema.DomainDescItem):
+    # test
+    """
+    {
+    "collection_name": "domain_desc",
+    "text": "디딤365 인트라넷에서 확인 가능한 연차 (휴가) 정보",
+    "domain_id": 9,
+    "name": "연차"
+    }
+    """
+    #connect milvus
+    try:
+        vector_db = milvus.connect_milvus(item.collection_name)
+        documents = milvus.insert_test_data_into_domain(item)
+        ids = milvus.create_ids(documents, "domain_id")
+        milvus.insert_milvus(vector_db, documents, ids)
+        print('Done')
+    except Exception as e:
+        raise HTTPException(500)
+    
+    
+@router.post("/delete_milvus_row")
+async def delete_milvus_row(collection_name: str, api_id: int):
+    """
+    Deletes a row from the specified Milvus collection using the provided api_id.
+    """
+    try:
+        # Milvus에 연결
+        vector_db = milvus.connect_milvus(collection_name)
+
+        # Milvus에서 문서 삭제
+        milvus.delete_from_milvus(vector_db, api_id)
+
+        return {"message": f"Document with api_id {api_id} deleted successfully from collection {collection_name}."}
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="An error occurred while deleting the document.")
+

@@ -144,7 +144,9 @@ class AssistantAgent(BaseSingleActionAgent):
                             
                             return AgentFinish(return_values=self._response, log="agent end with sql_call")
                     except Exception as e:
-                        return AgentAction(tool="chunk_text", tool_input=observation, log="error handling api call : " + str(e) + " so instead find docs text from vectorstore(chunk_text)", kwargs=config)
+                        error_msg = "error handling api call : " + str(e) + " so instead find docs text from vectorstore(chunk_text)"
+                        print(error_msg)
+                        return AgentAction(tool="chunk_text", tool_input=observation, log=error_msg, kwargs=config)
                 else:
                     return AgentAction(tool="chunk_text", tool_input=observation, log="find docs text from vectorstore(chunk_text)", kwargs=config)
             # 5. docs text 조회 후
