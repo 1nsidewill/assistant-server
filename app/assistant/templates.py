@@ -81,6 +81,6 @@ class AgentTemplates():
     def get_scores_with_documents(self, documents: list[Document]):
         scores = []
         for document in documents:
-            scores.append(document.metadata['score'])
+            scores.append(document.metadata.get('score', 0))
             
         return scores

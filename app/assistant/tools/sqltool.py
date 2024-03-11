@@ -79,7 +79,7 @@ class SQLCallTool():
             conf = Settings()
             if conf.data_uri is None:
                 raise ValueError("'data_uri' must be provided in .env.")
-            datadb = SQLDatabase.from_uri(conf.data_uri)
+            datadb = SQLDatabase.from_uri(database_uri=conf.data_uri, engine_args={"pool_recycle":360, "pool_pre_ping":True, "pool_size":3, "max_overflow":5})
 
         toolkit= SQLDatabaseToolkit(llm=llm, db=datadb)
         tools = toolkit.get_tools()

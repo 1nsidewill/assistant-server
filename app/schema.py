@@ -11,7 +11,7 @@ class AssistantQueryItem(BaseModel):
     
     default_threshold: float = 0.3
     domain_threshold: Optional[float] = 0
-    api_threshold: Optional[float] = 0
+    api_threshold: Optional[float] = 0.8
     chunk_text_threshold: Optional[float] = 0
 
     aadObjectId: Optional[str] = None

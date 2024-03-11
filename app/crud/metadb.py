@@ -31,7 +31,7 @@ class QueryMetaDB:
                 port=conf.metadb_PORT,
                 database=conf.metadb_DB,
             )
-            self.__class__._db = SQLDatabase.from_uri(database_uri=url_object)
+            self.__class__._db = SQLDatabase.from_uri(database_uri=url_object, engine_args={"pool_recycle":360, "pool_pre_ping":True, "pool_size":3, "max_overflow":5} )
         return self.__class__._db
     
     def run(
