@@ -77,7 +77,8 @@ def get_chatllm(config: Settings, max_tokens: int):
         clovastudio_api_key=config.hcx_clovastudio_api_key,
         apigw_api_key=config.hcx_apigw_api_key,
         callbacks=[get_callback(config)],
-        max_tokens=max_tokens
+        max_tokens=max_tokens,
+        temperature=0.01
     )
     
 def get_embeddings(config: Settings, max_tokens: int):
