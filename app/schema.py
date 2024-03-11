@@ -15,6 +15,7 @@ class AssistantQueryItem(BaseModel):
     chunk_text_threshold: Optional[float] = 0
 
     aadObjectId: Optional[str] = None
+    
     class Config:
         allow_population_by_field_name = True
 

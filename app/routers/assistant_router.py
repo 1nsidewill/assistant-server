@@ -22,7 +22,7 @@ async def invoke_with_timeout(executer, query, timeout=30):
 async def assistant_query(request: Request, item: schema.AssistantQueryItem):
     query = item.query
     
-    if item.aadObjectId:
+    if (item.aadObjectId is not None) and (item.aadObjectId != "string") :
         query += (" aadObjectId : " + item.aadObjectId)
         
     print("Querying Assistant with user input : " + query) 
