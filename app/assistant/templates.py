@@ -11,9 +11,10 @@ class AgentTemplates():
         template = '' 
         if self.template_type == 'rag':
             prompt = ChatPromptTemplate.from_template(
-                """아래의 context 내용을 바탕으로 사용자의 question에 답변해줘. 모르면 알지 못한다고 말해줘.:
+                """아래의 <context> 내용을 바탕으로 사용자의 question에 답변해줘. 모르면 알지 못한다고 말해줘.:
+                    <context>
                     {context}
-
+                    </context>
                     Question: {question}
                 """
             )
