@@ -129,18 +129,6 @@ class AssistantAgent(BaseSingleActionAgent):
                             return AgentFinish(return_values=self._response, log="agent end with api_call")
                         elif connect_type == "SQL":
                             self._response['stage'] = 'sql_call'
-                            
-                            service: dict = json.loads(connect_spec)
-                            server = service['servers'][0]
-                            from sqlalchemy import URL
-                            url_object = URL.create(
-                                server['dialet'],
-                                username=server['user'],
-                                password=server['password'],  # plain (unescaped) text
-                                host=server['host'],
-                                port=server['port'],
-                                database=server['name'],
-                            )
                                                         
                             sql = SQLCallTool.from_llm_and_spec(
                                 llm=self.llm,
@@ -148,6 +136,7 @@ class AssistantAgent(BaseSingleActionAgent):
                                 datadb=self.datadb,
                             )
                         
+                            result = sql.run()
                             self._response['query_response'] = result
                             
                             return AgentFinish(return_values=self._response, log="agent end with sql_call")
