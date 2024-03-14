@@ -7,14 +7,14 @@ class AssistantQueryItem(BaseModel):
     
     # HCX Options
     rag_top_k: Optional[int] = Field(default=3)
-    max_tokens: Optional[int] = Field(default=2048)
+    max_tokens: Optional[int] = Field(default=1536)
     
     default_threshold: float = 0.3
     domain_threshold: Optional[float] = 0
     api_threshold: Optional[float] = 0.5
     chunk_text_threshold: Optional[float] = 0
 
-    aadObjectId: Optional[str] = None
+    aadObjectId: str = ""
     
     class Config:
         allow_population_by_field_name = True

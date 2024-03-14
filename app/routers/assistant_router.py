@@ -21,14 +21,14 @@ async def invoke_with_timeout(executer, query, timeout=30):
 @router.post("/assistant_query")
 async def assistant_query(request: Request, item: schema.AssistantQueryItem):
     query = item.query
-    
-    if (item.aadObjectId is not None) and (item.aadObjectId != "string") :
-        query += (" aadObjectId : " + item.aadObjectId)
+    aadObjectId = ""
+    if len(item.aadObjectId) > 0 and (item.aadObjectId != "string") :
+        aadObjectId = item.aadObjectId
         
     print("Querying Assistant with user input : " + query) 
-    print("Headers Info :")
-    for header, value in request.headers.items():
-        print(f"{header}: {value}")
+    # print("Headers Info :")
+    # for header, value in request.headers.items():
+    #     print(f"{header}: {value}")
         
     try:
         executer: AgentExecutor = await create_assistant_agent(
@@ -38,7 +38,7 @@ async def assistant_query(request: Request, item: schema.AssistantQueryItem):
             max_tokens=item.max_tokens,
         )
         
-        response = await invoke_with_timeout(executer, {"query": query})
+        response = await invoke_with_timeout(executer, {"query": query, "aadObjectId": aadObjectId})
         print(response)
         
         if response is None:

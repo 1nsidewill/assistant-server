@@ -44,6 +44,7 @@ class AssistantAgent(BaseSingleActionAgent):
     # _metadb_uri: Optional[str] = None
     """query Database"""
     _response: dict[str, Any] = {}
+    """response dict"""
     
     def dict(self, **kwargs: Any) -> Dict:
         """Return dictionary representation of agent."""
@@ -62,12 +63,16 @@ class AssistantAgent(BaseSingleActionAgent):
     
     def _next(self, observation: Dict[str, Any], config: Dict[str, Any]) -> Union[AgentAction, AgentFinish]:
         query = observation['query']
+        aadObjectId = observation['aadObjectId']
+        observation.pop('aadObjectId')
+        print(json.dumps(self._response)) 
         
         """Parse text into agent action/finish."""
         intermediate_steps = observation.pop("intermediate_steps", None)
         if len(intermediate_steps) == 0:
             # 1. 처음 들어올 때
-            self._response.update({"query": query, "stage": "start"})
+            self._response.clear()
+            self._response.update({"query": query, "aadObjectId": aadObjectId, "stage": "start"})
             return AgentAction(tool="domain_desc", tool_input=query, log="find domain from vectorstore(domain_desc)", kwargs=config)
         else:
             intermediate = intermediate_steps[-1]
@@ -82,6 +87,7 @@ class AssistantAgent(BaseSingleActionAgent):
                     self._response['domain_id'] = domain_id
                     return AgentAction(tool="api_desc", tool_input=observation, log="find api from vectorstore(api_spec)", kwargs=config)
                 else:
+
                     return AgentFinish(return_values=self._response, log="cant find domain from vectorstore(domain_desc)")
             # 3. api_spec 조회 후
             elif agent_action.tool == "api_desc":
@@ -115,6 +121,8 @@ class AssistantAgent(BaseSingleActionAgent):
                                 spec=OpenAPISpec.from_spec_dict(app_api_spec),
                             )
                             
+                            if len(aadObjectId) > 0:
+                                observation['query'] = observation['query'] + '\n- aadObjectId:' + aadObjectId
                             result = api_tool.run(observation)
                             self._response['query_response'] = result
                             

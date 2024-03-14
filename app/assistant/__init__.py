@@ -12,6 +12,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.requests import (RequestsWrapper)
 from langchain.tools.retriever import (create_retriever_tool)
 from langchain.vectorstores.milvus import Milvus
+# from langchain_community.vectorstores.milvus_extend import MMRMilvus
 
 from langchain_community.chat_models import ChatHCX
 from langchain_community.embeddings import HCXEmbeddings
@@ -22,7 +23,7 @@ from langchain_community.utilities.sql_database import (SQLDatabase)
 
 from app.assistant.agent import AssistantAgent
 from app.assistant.tools.openapitool import OpenAPITool
-from app.assistant.tools.document_retriever_tool import create_retriever_tool as document_retriever_tool
+from app.assistant.tools.document_retriever_tool import retriever_tool
 from app.assistant.sessionlog import RedisSessionLog
 
 from app.config import Settings
@@ -58,14 +59,24 @@ def get_retriever_tool(embeddings: Embeddings, collection_name: str,
         # Add Partition key Field
         partition_key_field = partition_key if partition_key != "" else {}
     )
+    # vectorstore = MMRMilvus(
+    #     connection_args = connection_args,
+    #     embedding_function = (embeddings or get_embeddings(config)),
+    #     collection_name = collection_name or config.milvus_collection,
+    #     drop_old = False,
+    #     # Add Partition key Field
+    #     partition_key_field = partition_key if partition_key != "" else {},
+    #     operation=re_order_ids
+    # )
     
-    return document_retriever_tool(
-        vectorstore.as_retriever(
+    return retriever_tool().create_retriever_tool(
+        milvus=vectorstore,
+        retriever=vectorstore.as_retriever(
             search_type="similarity_score_threshold",
             search_kwargs={'k': top_k, 'score_threshold': threshold}
         ), 
-        collection_name, 
-        "Searches and returns from milvus collection " + collection_name
+        name=collection_name, 
+        description="Searches and returns from milvus collection " + collection_name
     )
     
 def get_sql(database_uri: str):
@@ -92,7 +103,6 @@ def get_embeddings(config: Settings, max_tokens: int):
     )
     
     
-
 async def create_assistant_agent(
     config: Settings,
     thresholds: dict[str, float | None],
