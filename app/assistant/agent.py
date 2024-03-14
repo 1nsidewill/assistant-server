@@ -65,7 +65,6 @@ class AssistantAgent(BaseSingleActionAgent):
         query = observation['query']
         aadObjectId = observation['aadObjectId']
         observation.pop('aadObjectId')
-        print(json.dumps(self._response)) 
         
         """Parse text into agent action/finish."""
         intermediate_steps = observation.pop("intermediate_steps", None)
@@ -73,6 +72,8 @@ class AssistantAgent(BaseSingleActionAgent):
             # 1. 처음 들어올 때
             self._response.clear()
             self._response.update({"query": query, "aadObjectId": aadObjectId, "stage": "start"})
+
+            print(json.dumps(self._response))
             return AgentAction(tool="domain_desc", tool_input=query, log="find domain from vectorstore(domain_desc)", kwargs=config)
         else:
             intermediate = intermediate_steps[-1]
@@ -85,9 +86,12 @@ class AssistantAgent(BaseSingleActionAgent):
                     domain_id = docs[0].metadata['domain_id']
                     observation.update({"domain_id": domain_id})
                     self._response['domain_id'] = domain_id
+
+                    print(json.dumps(self._response))
                     return AgentAction(tool="api_desc", tool_input=observation, log="find api from vectorstore(api_spec)", kwargs=config)
                 else:
 
+                    print(json.dumps(self._response))
                     return AgentFinish(return_values=self._response, log="cant find domain from vectorstore(domain_desc)")
             # 3. api_spec 조회 후
             elif agent_action.tool == "api_desc":
@@ -125,7 +129,8 @@ class AssistantAgent(BaseSingleActionAgent):
                                 observation['query'] = observation['query'] + '\n- aadObjectId:' + aadObjectId
                             result = api_tool.run(observation)
                             self._response['query_response'] = result
-                            
+
+                            print(json.dumps(self._response))
                             return AgentFinish(return_values=self._response, log="agent end with api_call")
                         elif connect_type == "SQL":
                             self._response['stage'] = 'sql_call'
@@ -139,12 +144,16 @@ class AssistantAgent(BaseSingleActionAgent):
                             result = sql.run()
                             self._response['query_response'] = result
                             
+                            print(json.dumps(self._response))
                             return AgentFinish(return_values=self._response, log="agent end with sql_call")
                     except Exception as e:
                         error_msg = "error handling api call : " + str(e) + " so instead find docs text from vectorstore(chunk_text)"
                         print(error_msg)
+
+                        print(json.dumps(self._response))
                         return AgentAction(tool="chunk_text", tool_input=observation, log=error_msg, kwargs=config)
                 else:
+                    print(json.dumps(self._response))
                     return AgentAction(tool="chunk_text", tool_input=observation, log="find docs text from vectorstore(chunk_text)", kwargs=config)
             # 5. docs text 조회 후
             elif agent_action.tool == "chunk_text":
@@ -162,9 +171,10 @@ class AssistantAgent(BaseSingleActionAgent):
                     result = chain.invoke({"context":context, "question": query})
                     self._response['query_response'] = result
 
-                    
+                    print(json.dumps(self._response))
                     return AgentFinish(return_values=self._response, log="agent end with docs text")
                 else:
+                    print(json.dumps(self._response))
                     return AgentFinish(return_values=self._response, log="cant find data from vectorstore(api_desc or chunk_text)")
     
     async def _anext(self, observation: Dict[str, Any], config: Dict[str, Any]) -> Union[AgentAction, AgentFinish]:

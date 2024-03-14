@@ -25,7 +25,7 @@ async def assistant_query(request: Request, item: schema.AssistantQueryItem):
     if len(item.aadObjectId) > 0 and (item.aadObjectId != "string") :
         aadObjectId = item.aadObjectId
         
-    print("Querying Assistant with user input : " + query) 
+    # print("Querying Assistant with user input : " + query) 
     # print("Headers Info :")
     # for header, value in request.headers.items():
     #     print(f"{header}: {value}")
